@@ -1,16 +1,17 @@
-<div class="btn-group-vertical" dropdown is-open="isopen">
+<div class="btn-group-vertical" dropdown is-open="isopen"><!-- 
     <button type="button"
             class="btn btn-default hyperlink"
             title="{{ 'link' | lang:'ui' }}"
             ng-class="{'active': isopen}"
             ng-click="addHyperlink()"
-            ng-disabled="minder.queryCommandState('HyperLink') === -1"></button>
+            ng-disabled="minder.queryCommandState('HyperLink') === -1"></button> -->
     <button type="button"
             class="btn btn-default hyperlink-caption dropdown-toggle"
             ng-disabled="minder.queryCommandState('HyperLink') === -1"
             title="{{ 'link' | lang:'ui' }}"
             dropdown-toggle>
-        <span class="caption">{{ 'link' | lang:'ui' }}</span>
+        <!-- <span class="caption">{{ 'link' | lang:'ui' }}</span> -->
+        <span class="uex-icon-attachment"></span>
         <span class="caret"></span>
         <span class="sr-only">{{ 'link' | lang:'ui' }}</span>
     </button>

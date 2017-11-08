@@ -1,5 +1,4 @@
 .resource-editor {
-    vertical-align: middle;
     display: inline-block;
     margin: 5px;
 
@@ -15,19 +14,21 @@
     .resource-dropdown {
         position: relative;
         width: 168px;
-        border: 1px solid #ccc;
         margin-top: -1px;
-        border-bottom-right-radius: 4px;
-        border-bottom-left-radius: 4px;
+        overflow: visible;
 
         .km-resource {
             position: absolute;
-            width: 154px;
-            margin-bottom: 3px;
+            width: 168px;
             padding: 0;
             list-style-type: none;
-            overflow: scroll;
+            overflow: auto;
             max-height: 500px;
+            min-height: 24px;
+            border: 1px solid #ccc;
+            border-bottom-right-radius: 4px;
+            border-bottom-left-radius: 4px;
+            background: white;
 
             &.open {
                 z-index: 3;

@@ -6,9 +6,23 @@ define(function(require, exports, module){
 
         var main = hotbox.state('main');
 
+        var buttonsLabel = {
+            'zh-CN': {
+                'priority': '优先级',
+                'remove': '移除',
+                'back': '返回'
+            },
+            'en': {
+                'priority': 'Priority',
+                'remove': 'Remove',
+                'back': 'Back'
+            }
+        };
+        var lang = window.DEFAULTLANG || localStorage['DEFAULTLANG'] || 'zh-CN';
+
         main.button({
             position: 'top',
-            label: '优先级',
+            label: buttonsLabel[lang].priority,
             key: 'P',
             next: 'priority',
             enable: function() {
@@ -30,7 +44,7 @@ define(function(require, exports, module){
 
         priority.button({
             position: 'center',
-            label: '移除',
+            label: buttonsLabel[lang].remove,
             key: 'Del',
             action: function() {
                 minder.execCommand('Priority', 0);
@@ -39,7 +53,7 @@ define(function(require, exports, module){
 
         priority.button({
             position: 'top',
-            label: '返回',
+            label: buttonsLabel[lang].back,
             key: 'esc',
             next: 'back'
         });

@@ -20,6 +20,15 @@ define(function(require, exports, module) {
         var receiver = this.receiver;
         var receiverElement = receiver.element;
         var isGecko = window.kity.Browser.gecko;
+        var buttonsLabel = {
+            'zh-CN': {
+                'edit': '编辑'
+            },
+            'en': {
+                'edit': 'Edit'
+            }
+        };
+        var lang = window.DEFAULTLANG || localStorage['DEFAULTLANG'] || 'zh-CN';
 
         // setup everything to go
         setupReciverElement();
@@ -88,13 +97,13 @@ define(function(require, exports, module) {
 
             updatePosition();
         }
-
+        
 
         // edit entrance in hotbox
         function setupHotbox() {
             hotbox.state('main').button({
                 position: 'center',
-                label: '编辑',
+                label: buttonsLabel[lang].edit,
                 key: 'F2',
                 enable: function() {
                     return minder.queryCommandState('text') != -1;
@@ -111,29 +120,29 @@ define(function(require, exports, module) {
          */
          // edit for the selected node
         function editText() {
-            var node = minder.getSelectedNode();
-            if (!node) {
-                return;
-            }
-            var textContainer = receiverElement;
-            receiverElement.innerText = "";
-            if (node.getData('font-weight') === 'bold') {
-                var b = document.createElement('b');
-                textContainer.appendChild(b);
-                textContainer = b;
-            }
-            if (node.getData('font-style') === 'italic') {
-                var i = document.createElement('i');
-                textContainer.appendChild(i);
-                textContainer = i;
-            }
-            textContainer.innerText = minder.queryCommandValue('text');
+            // var node = minder.getSelectedNode();
+            // if (!node) {
+            //     return;
+            // }
+            // var textContainer = receiverElement;
+            // receiverElement.innerText = "";
+            // if (node.getData('font-weight') === 'bold') {
+            //     var b = document.createElement('b');
+            //     textContainer.appendChild(b);
+            //     textContainer = b;
+            // }
+            // if (node.getData('font-style') === 'italic') {
+            //     var i = document.createElement('i');
+            //     textContainer.appendChild(i);
+            //     textContainer = i;
+            // }
+            // textContainer.innerText = minder.queryCommandValue('text');
 
-            if (isGecko) {
-                receiver.fixFFCaretDisappeared();
-            };
-            fsm.jump('input', 'input-request');
-            receiver.selectAll();
+            // if (isGecko) {
+            //     receiver.fixFFCaretDisappeared();
+            // };
+            // fsm.jump('input', 'input-request');
+            // receiver.selectAll();
         }
 
         /**

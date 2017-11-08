@@ -74,14 +74,114 @@
 
 
 <script>
+    var testJson = {
+    "root": {
+        "data": {
+            "id": "0",
+            "text": "数据架构定义",
+            "note": "数据架构定义",
+            "progress": 1,
+            "attribute": {
+                "label": "数据架构定义",
+                "name": "DAD",
+                "descr": ""
+            },
+        },
+        "children": [
+            {
+                "data": {
+                    "id": "1",
+                    "text": "主题",
+                    "note": "主题",
+                    "subjectType": "topic",
+                    "progress": 1,
+                    "attribute": {
+                        "label": "主题",
+                        "name": "topic",
+                        "descr": ""
+                    },
+                    "parentId": "0"
+                },
+                "children": []
+            },
+            {
+                "data": {
+                    "id": "2",
+                    "text": "层次",
+                    "note": "层次",
+                    "subjectType": "lvl",
+                    "progress": 1,
+                    "attribute": {
+                        "label": "层次",
+                        "name": "lvl",
+                        "descr": ""
+                    },
+                    "parentId": "0"
+                },
+                "children": []
+            },
+            {
+                "data": {
+                    "id": "3",
+                    "text": "系统",
+                    "note": "系统",
+                    "subjectType": "sys",
+                    "progress": 1,
+                    "attribute": {
+                        "label": "系统",
+                        "name": "sys",
+                        "descr": ""
+                    },
+                    "parentId": "0"
+                },
+                "children": []
+            },
+            {
+                "data": {
+                    "id": "4",
+                    "text": "数据库",
+                    "note": "数据库",
+                    "subjectType": "db",
+                    "progress": 1,
+                    "attribute": {
+                        "label": "数据库",
+                        "descr": ""
+                    },
+                    "parentId": "0"
+                },
+                "children": []
+            },
+            {
+                "data": {
+                    "id": "5",
+                    "text": "域",
+                    "note": "域",
+                    "subjectType": "domain",
+                    "progress": 1,
+                    "attribute": {
+                        "label": "域",
+                        "name": "domain",
+                        "descr": ""
+                    },
+                    "parentId": "0"
+                },
+                "children": []
+            }
+        ]
+    },
+    "template": "default",
+    "theme": "fresh-blue",
+    "version": "1.4.43"
+}
 	angular.module('kityminderDemo', ['kityminderEditor'])
-			.config(function (configProvider) {
-				configProvider.set('imageUpload', '../server/imageUpload.php');
-			})
 			.controller('MainController', function($scope) {
 				$scope.initEditor = function(editor, minder) {
 					window.editor = editor;
 					window.minder = minder;
+					minder.setStatus('readonly');
+                    minder.execCommand('ExpandToLevel', 2)
+					minder.importJson(testJson);
+					minder.execCommand('template', 'filetree');
 				};
 			});
 

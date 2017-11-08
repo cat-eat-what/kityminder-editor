@@ -1,7 +1,150 @@
 angular.module('kityminderEditor')
-	.service('lang.zh-cn', function() {
+	.service('lang.i18n', function() {
 		return {
-			'zh-cn': {
+			'en': {
+				"template": {
+		            "default": "Mind Chart",
+		            "tianpan": "Weather Chart",
+		            "structure": "Organization Structure Chart",
+		            "filetree": "Menu Organization Chart",
+		            "right": "Logical Chart",
+		            "fish-bone": "Fish Bone Chart"
+		        },
+		        "maintopic": "Topic",
+		        "topic": "Branch Topic",
+		        "panels": {
+		            "theme": "Skin",
+		            "layout": "Layout",
+		            "style": "Style",
+		            "font": "Font",
+		            "color": "Color",
+		            "background": "Background",
+		            "insert": "Insert",
+		            "arrange": "Adjust",
+		            "nodeop": "Current",
+		            "priority": "Priority",
+		            "progress": "Progress",
+		            "resource": "Resource",
+		            "note": "Note",
+		            "attachment": "Attachment",
+		            "word": "Word"
+		        },
+		        "ui": {
+		            "command": {
+		                "appendsiblingnode": "Insert",
+		                "appendparentnode": "ParentNode Insert",
+		                "appendchildnode": "ChildNode Insert",
+		                "removenode": "Delete",
+		                "importnode": "Import",
+		                "exportnode": "Export",
+		                "editnode": "Edit",
+		                "arrangeup": "Bring Forward",
+		                "arrangedown": "Bring backward",
+		                "resetlayout": "Arrange Layout",
+		                "expandtoleaf": "Expand All Nodes",
+		                "expandtolevel1": "Expand To level1 Node",
+		                "expandtolevel2": "Expand To Level2 Node",
+		                "expandtolevel3": "Expand To Level3 Node",
+		                "expandtolevel4": "Expand To Level4 Node",
+		                "expandtolevel5": "Expand To Level5 Node",
+		                "expandtolevel6": "Expand To Level6 Node",
+		                "fullscreen": "Fullscreen",
+		                "outline": "Outline"
+		            },
+		            "search":"Search",
+		            "expandtoleaf": "Expand",
+		            "back": "Back",
+		            "undo": "Undo (Ctrl + Z)",
+		            "redo": "Redo (Ctrl + Y)",
+		            "bold": "Bold",
+		            "italic": "Italic",
+		            "forecolor": "Forecolor",
+		            "fontfamily": "Font",
+		            "fontsize": "Fontsize",
+		            "zoom-in": "Zoom In",
+		            "zoom-out": "Zoom Out",
+		            "markers": "Mark",
+		            "resource": "Resource",
+		            "help": "Help",
+		            "preference": "Preference",
+		            "expandnode": "Expand To Leaf",
+		            "collapsenode": "Collapse To Level1 Node",
+		            "template": "Template",
+		            "theme": "Skin",
+		            "clearstyle": "Clear Style",
+		            "copystyle": "Copy Styple",
+		            "pastestyle": "Paste Style",
+		            "appendsiblingnode": "Topic",
+		            "appendchildnode": "ChildNode Topic",
+		            "arrangeup": "Arrange Up",
+		            "arrangedown": "Arrange Down",
+		            "editnode": "Edit",
+		            "removenode": "Remove",
+		            "priority": "Priority",
+		            "link": "Link",
+		            "image": "Image",
+		            "note": "Node",
+		            "senior": "Senior",
+		            "insertlink": "Insert Link",
+		            "insertimage": "Insert Image",
+		            "insertnote": "Insert Note",
+		            "removelink": "Remove Links",
+		            "removeimage": "Remove Images",
+		            "removenote": "Remove Notes",
+		            "resetlayout": "Arrange",
+		            "selectall": "Select All",
+		            "selectrevert": "Revert",
+		            "selectsiblings": "Select Siblings",
+		            "selectlevel": "Select Node",
+		            "selectpath": "Select Path",
+		            "selecttree": "Select Tree"
+		        },
+		        "dialogs": {
+		            "markers": {
+		                "static": {
+		                    "lang_input_text": "Text：",
+		                    "lang_input_url": "URL_Address：",
+		                    "lang_input_title": "Title：",
+		                    "lang_input_target": "New Windows："
+		                },
+		                "priority": "Priority",
+		                "none": "None",
+		                "progress": {
+		                    "title": "Progress",
+		                    "notdone": "Going",
+		                    "done1": "Done 1/8",
+		                    "done2": "Done 1/4",
+		                    "done3": "Done 3/8",
+		                    "done4": "Done 1/2",
+		                    "done5": "Done 5/8",
+		                    "done6": "Done 3/4",
+		                    "done7": "Done 7/8",
+		                    "done": "Done"
+		                }
+		            },
+		            "help": {
+
+		            },
+		            "hyperlink": {},
+		            "image": {},
+		            "resource": {}
+		        },
+		        "hyperlink": {
+		            "hyperlink": "Link...",
+		            "unhyperlink": "Remove Link"
+		        },
+		        "image": {
+		            "image": "Image...",
+		            "removeimage": "Remove Image"
+		        },
+		        "marker": {
+		            "marker": "Progress..."
+		        },
+		        "resource": {
+		            "resource": "Resource..."
+		        }
+			},
+			'zh-CN': {
 				'template': {
 					'default': '思维导图',
 					'tianpan': '天盘图',
@@ -143,6 +286,7 @@ angular.module('kityminderEditor')
 					}
 				},
 				'ui': {
+					'senior': '高级',
 					'shared_file_title': '[分享的] {0} (只读)',
 					'load_share_for_edit': '正在加载分享的文件...',
 					'share_sync_success': '分享内容已同步',

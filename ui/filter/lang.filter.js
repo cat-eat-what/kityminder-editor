@@ -1,5 +1,5 @@
 angular.module('kityminderEditor')
-	.filter('lang', ['config', 'lang.zh-cn', function(config, lang) {
+	.filter('lang', ['config', 'lang.i18n', function(config, lang) {
 		return function(text, block) {
 			var defaultLang = config.get('defaultLang');
 

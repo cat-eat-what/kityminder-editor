@@ -1,7 +1,7 @@
 <div class="font-operator">
     <div class="dropdown font-family-list" dropdown>
         <div class="dropdown-toggle current-font-item" dropdown-toggle ng-disabled="minder.queryCommandState('fontfamily') === -1">
-            <a href class="current-font-family"  title="{{ 'fontfamily' | lang: 'ui' }}">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || '字体' }}</a>
+            <a href class="current-font-family"  title="{{ 'fontfamily' | lang: 'ui' }}">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || ('fontfamily' | lang:'ui') }}</a>
             <span class="caret"></span>
         </div>
         <ul class="dropdown-menu font-list">
@@ -12,7 +12,7 @@
     </div>
     <div class="dropdown font-size-list" dropdown>
         <div class="dropdown-toggle current-font-item" dropdown-toggle ng-disabled="minder.queryCommandState('fontsize') === -1">
-            <a href class="current-font-size"  title="{{ 'fontsize' | lang: 'ui' }}">{{ minder.queryCommandValue('fontsize') || '字号' }}</a>
+            <a href class="current-font-size"  title="{{ 'fontsize' | lang: 'ui' }}">{{ minder.queryCommandValue('fontsize') || ('fontsize' | lang:'ui') }}</a>
             <span class="caret"></span>
         </div>
         <ul class="dropdown-menu font-list">
@@ -21,14 +21,15 @@
             </li>
         </ul>
     </div>
-    <span class="s-btn-icon font-bold"
+    <span class="font-bold"
           ng-click="minder.queryCommandState('bold') === -1 || minder.execCommand('bold')"
           ng-class="{'font-bold-selected' : minder.queryCommandState('bold') == 1}"
-          ng-disabled="minder.queryCommandState('bold') === -1"></span>
-    <span class="s-btn-icon font-italics"
+          ng-disabled="minder.queryCommandState('bold') === -1">&Beta;</span>
+    <span class="font-italics"
           ng-click="minder.queryCommandState('italic') === -1 || minder.execCommand('italic')"
           ng-class="{'font-italics-selected' : minder.queryCommandState('italic') == 1}"
           ng-disabled="minder.queryCommandState('italic') === -1">
+          <i>&Iota;</i>
     </span>
     <div class="font-color-wrap">
         <span class="quick-font-color"

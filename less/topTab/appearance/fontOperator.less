@@ -1,22 +1,44 @@
 .font-operator {
-    width: 170px;
+    // width: 170px;
     display: inline-block;
     vertical-align: middle;
     font-size: 12px;
     padding: 0 5px;
+    border-left: 1px solid #E5E9F2;
+    border-right: 1px solid #E5E9F2;
+
 
     .font-size-list {
         display: inline-block;
-        border: 1px solid #eee;
+        border: 1px solid #E5E9F2;
         padding: 2px 4px;
+        background: #ffffff;
+        color: #475669;
+        border-radius: 4px;
+        margin-right: 3px;
     }
 
     .font-family-list {
         display: inline-block;
-        border: 1px solid #eee;
+        border: 1px solid #E5E9F2;
         padding: 2px 4px;
+        background: #ffffff;
+        color: #475669;
+        border-radius: 4px;
+        margin-right: 3px;
     }
 
+}
+
+a {
+    color: #475669;
+}
+
+.btn-default {
+    color: #475669;
+    background-color: transparent;
+    border-color: #ccc;
+    font-size: 12px;
 }
 
 .current-font-item a {
@@ -25,14 +47,14 @@
 }
 
 .current-font-family {
-    width: 75px;
-    height: 18px;
+    width: 32px;
+    height: 16px;
     overflow: hidden;
     vertical-align: bottom;
 }
 .current-font-size {
     width: 32px;
-    height: 18px;
+    height: 16px;
     overflow: hidden;
     vertical-align: bottom;
 }
@@ -52,9 +74,12 @@
 
 .font-bold, .font-italics {
     display: inline-block;
-    background: url(images/icons.png) no-repeat;
+    font-size: 14px;
+    font-weight: 800;
     cursor: pointer;
     margin: 0 3px;
+    line-height: 35px;
+    color: #475669;
 
 
     &:hover {
@@ -85,9 +110,8 @@
 .font-color-wrap {
     display: inline-block;
     width: 30px;
-    height: 22px;
-    margin: 3px 3px 0 0;
-    border: 1px #efefef solid;
+    height: 36px;
+    padding: 8px 0px;
     vertical-align: middle;
     font-size: 0;
     -webkit-user-select: none;
@@ -108,7 +132,7 @@
         vertical-align: top;
         text-align: center;
         cursor: default;
-        color: #000;
+        color: #475669;
 
         &:hover {
             background-color: @tool-hover;

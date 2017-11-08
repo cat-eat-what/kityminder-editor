@@ -1,14 +1,13 @@
 .btn-group-vertical {
     vertical-align: top;
-    margin: 5px;
+    margin: 0px 5px;
 
     &.note-btn-group {
-        border-right: 1px dashed #eee;
+        border-right: 1px solid #E5E9F2;
         padding-right: 5px;
     }
 
     .note-btn, .note-btn-caption {
-        width: 40px;
         margin: 0;
         padding: 0;
         border: none!important;
@@ -29,12 +28,13 @@
     }
 
     .note-btn {
-        height: 25px;
+        height: 36px;
         background: url(images/icons.png) no-repeat center -1150px;
     }
 
     .note-btn-caption {
-        height: 20px;
+        height: 30px;
+        margin-top: -3px;
 
         .caption {
             font-size: 12px;
@@ -45,4 +45,30 @@
 //override bootstrap
 .open > .dropdown-toggle.btn-default {
     background-color: @tool-hover;
+}
+.senior-drop-menu {
+    position: absolute;
+    right: 0px;
+    top: 36px;
+    z-index: 100;
+    display: block;
+    padding: 10px;
+    border: 1px solid #d3d3d3;
+    background-color: #fff;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    white-space: nowrap;
+}
+.senior-drop-menu > div, .senior-drop-menu > ul {
+    display:inline-block;
+    white-space: initial;
+}
+.senior-drop-menu button[class^="uex-icon-"] {
+    border: 0px;
+    font-size: 16px;
+    background: transparent;
+    width: 40px;
+    line-height: 30px;
+    color: #475669;
+    text-align: center;
+
 }

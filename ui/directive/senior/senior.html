@@ -1,0 +1,16 @@
+<div class="btn-group-vertical senior" dropdown is-open="isopen">
+    <button type="button"
+            class="btn btn-default note-btn-caption dropdown-toggle"
+            title="{{ 'senior' | lang:'ui' }}"
+            ng-click="showDrop($event)">
+        <span>{{ 'senior' | lang:'ui' }}</span>
+        <span class="caret"></span>
+    </button>
+    <div class="senior-drop-menu" ng-click="showDropMenu($event)" style="display: none">
+        <priority-editor minder="minder"></priority-editor>
+        <template-list minder="minder" class="inline-directive"></template-list>
+        <resource-editor minder="minder"></resource-editor>
+        <expand-level minder="minder"></expand-level>
+        <select-all minder="minder"></select-all>
+    </div>
+</div>

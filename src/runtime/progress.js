@@ -6,9 +6,23 @@ define(function(require, exports, module){
 
         var main = hotbox.state('main');
 
+        var buttonsLabel = {
+            'zh-CN': {
+                'progress': '进度',
+                'remove': '移除',
+                'back': '返回'
+            },
+            'en': {
+                'progress': 'Progress',
+                'remove': 'Remove',
+                'back': 'Back'
+            }
+        };
+        var lang = window.DEFAULTLANG || localStorage['DEFAULTLANG'] || 'zh-CN';
+
         main.button({
             position: 'top',
-            label: '进度',
+            label: buttonsLabel[lang].progress,
             key: 'G',
             next: 'progress',
             enable: function() {
@@ -30,7 +44,7 @@ define(function(require, exports, module){
 
         progress.button({
             position: 'center',
-            label: '移除',
+            label: buttonsLabel[lang].remove,
             key: 'Del',
             action: function() {
                 minder.execCommand('Progress', 0);
@@ -39,7 +53,7 @@ define(function(require, exports, module){
 
         progress.button({
             position: 'top',
-            label: '返回',
+            label: buttonsLabel[lang].back,
             key: 'esc',
             next: 'back'
         });

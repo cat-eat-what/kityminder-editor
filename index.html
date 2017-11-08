@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="bower_components/hotbox/hotbox.css" />
     <link rel="stylesheet" href="bower_components/kityminder-core/dist/kityminder.core.css" />
     <link rel="stylesheet" href="bower_components/color-picker/dist/color-picker.css" />
+    <link rel="stylesheet" href="bower_components/element-uex/element-uex.min.css" />
 	<!-- endbower -->
 
 	<link rel="stylesheet" href="dist/kityminder.editor.css">
@@ -37,7 +38,6 @@
     </style>
 </head>
 <body ng-app="kityminderDemo" ng-controller="MainController">
-    <h1 class="editor-title">KityMinder Editor - Powered By FEX</h1>
     <kityminder-editor on-init="initEditor(editor, minder)"></kityminder-editor>
 </body>
 
@@ -62,13 +62,14 @@
 <script src="bower_components/kityminder-core/dist/kityminder.core.js"></script>
 <script src="bower_components/color-picker/dist/color-picker.js"></script>
 <script src="bower_components/seajs/dist/sea.js"></script>
+<script src="src/fileSaver.js"></script>
 <!-- endbower -->
 
 <script src="ui/kityminder.app.js"></script>
 <script src="ui/service/commandBinder.service.js"></script>
 <script src="ui/service/config.service.js"></script>
 <script src="ui/service/memory.service.js"></script>
-<script src="ui/service/lang.zh-cn.service.js"></script>
+<script src="ui/service/lang.i18n.service.js"></script>
 <script src="ui/service/valueTransfer.service.js"></script>
 <script src="ui/service/minder.service.js"></script>
 <script src="ui/service/resource.service.js"></script>
@@ -77,6 +78,7 @@
 <script src="ui/filter/lang.filter.js"></script>
 <script src="ui/dialog/hyperlink/hyperlink.ctrl.js"></script>
 <script src="ui/dialog/image/image.ctrl.js"></script>
+<script src="ui/directive/senior/senior.directive.js"></script>
 <script src="ui/dialog/imExportNode/imExportNode.ctrl.js"></script>
 <script src="ui/directive/topTab/topTab.directive.js"></script>
 <script src="ui/directive/undoRedo/undoRedo.directive.js"></script>
@@ -92,6 +94,7 @@
 <script src="ui/directive/noteEditor/noteEditor.directive.js"></script>
 <script src="ui/directive/notePreviewer/notePreviewer.directive.js"></script>
 <script src="ui/directive/kityminderEditor/kityminderEditor.directive.js"></script>
+<script src="ui/directive/kityminderViewer/kityminderViewer.directive.js"></script>
 <script src="ui/directive/templateList/templateList.directive.js"></script>
 <script src="ui/directive/themeList/themeList.directive.js"></script>
 <script src="ui/directive/layout/layout.directive.js"></script>
@@ -106,14 +109,57 @@
 
 
 <script>
+    var testJson = {
+        "root": {
+            "data": {
+               "id": "123abcABC",
+                "text": "ccccc",
+                "note": "hahahhha"
+            },
+            "children": [ 
+                {
+                    "data": {
+                        "id": "1",
+                        "text": "主题",
+                        "note": "主题",
+                        "subjectType": "topic",
+                        "attribute": {
+                            "label": "主题",
+                            "name": "topic",
+                            "descr": ""
+                        },
+                        "parentId": "0",
+                        "isRemove": false
+                    },
+                    "children": []
+                }
+            ]
+        },
+        "template": "default",
+        "theme": "fresh-blue",
+        "version": "1.4.43"
+    }
 	angular.module('kityminderDemo', ['kityminderEditor'])
 			.controller('MainController', function($scope) {
 				$scope.initEditor = function(editor, minder) {
 					window.editor = editor;
 					window.minder = minder;
+
+                    minder.importJson(testJson);
+                    minder.on('dblclick', function() {
+                        if (minder.getSelectedNode() && minder._status !== 'readonly') {
+                            console.log(minder.getSelectedNode());
+                        }
+                    });
+                    minder._commands.removenode.execute(minder, function(removeFun){
+                        console.log('njnjnj');
+
+                        removeFun(minder);
+                    })
 				};
 			});
 
+    
 </script>
 
 </html>

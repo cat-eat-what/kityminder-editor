@@ -108,10 +108,22 @@ define(function(require, exports, module) {
         minder.on('import', reset);
         minder.on('patch', updateSelection);
 
+        var buttonsLabel = {
+            'zh-CN': {
+                'undo': '撤销',
+                'redo': '重做'
+            },
+            'en': {
+                'undo': 'Undo',
+                'redo': 'Redo'
+            }
+        };
+        var lang = window.DEFAULTLANG || localStorage['DEFAULTLANG'] || 'zh-CN';
+
         var main = hotbox.state('main');
         main.button({
             position: 'top',
-            label: '撤销',
+            label: buttonsLabel[lang].undo,
             key: 'Ctrl + Z',
             enable: hasUndo,
             action: undo,
@@ -119,7 +131,7 @@ define(function(require, exports, module) {
         });
         main.button({
             position: 'top',
-            label: '重做',
+            label: buttonsLabel[lang].redo,
             key: 'Ctrl + Y',
             enable: hasRedo,
             action: redo,

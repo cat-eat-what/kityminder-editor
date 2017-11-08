@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.60 - 2017-04-28
+ * kityminder-editor - v1.0.60 - 2017-11-08
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2017 ; Licensed 
@@ -56,20 +56,20 @@ _p[0] = {
             }
         }
         KMEditor.assemble = assemble;
+        assemble(_p.r(8));
+        assemble(_p.r(10));
+        assemble(_p.r(15));
+        assemble(_p.r(19));
+        assemble(_p.r(12));
+        assemble(_p.r(13));
+        assemble(_p.r(6));
         assemble(_p.r(7));
         assemble(_p.r(9));
-        assemble(_p.r(14));
-        assemble(_p.r(18));
-        assemble(_p.r(11));
-        assemble(_p.r(12));
-        assemble(_p.r(5));
-        assemble(_p.r(6));
-        assemble(_p.r(8));
-        assemble(_p.r(15));
-        assemble(_p.r(10));
-        assemble(_p.r(13));
         assemble(_p.r(16));
+        assemble(_p.r(11));
+        assemble(_p.r(14));
         assemble(_p.r(17));
+        assemble(_p.r(18));
         return module.exports = KMEditor;
     }
 };
@@ -89,20 +89,170 @@ _p[1] = {
     }
 };
 
+//src/fileSaver.js
+/* FileSaver.js
+ * A saveAs() FileSaver implementation.
+ * 1.3.2
+ * 2016-06-16 18:25:19
+ *
+ * By Eli Grey, http://eligrey.com
+ * License: MIT
+ *   See https://github.com/eligrey/FileSaver.js/blob/master/LICENSE.md
+ */
+/*global self */
+/*jslint bitwise: true, indent: 4, laxbreak: true, laxcomma: true, smarttabs: true, plusplus: true */
+/*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/FileSaver.js */
+var saveAs = saveAs || function(view) {
+    "use strict";
+    // IE <10 is explicitly unsupported
+    if (typeof view === "undefined" || typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
+        return;
+    }
+    var doc = view.document, get_URL = function() {
+        return view.URL || view.webkitURL || view;
+    }, save_link = doc.createElementNS("http://www.w3.org/1999/xhtml", "a"), can_use_save_link = "download" in save_link, click = function(node) {
+        var event = new MouseEvent("click");
+        node.dispatchEvent(event);
+    }, is_safari = /constructor/i.test(view.HTMLElement) || view.safari, is_chrome_ios = /CriOS\/[\d]+/.test(navigator.userAgent), throw_outside = function(ex) {
+        (view.setImmediate || view.setTimeout)(function() {
+            throw ex;
+        }, 0);
+    }, force_saveable_type = "application/octet-stream", arbitrary_revoke_timeout = 1e3 * 40, revoke = function(file) {
+        var revoker = function() {
+            if (typeof file === "string") {
+                // file is an object URL
+                get_URL().revokeObjectURL(file);
+            } else {
+                // file is a File
+                file.remove();
+            }
+        };
+        setTimeout(revoker, arbitrary_revoke_timeout);
+    }, dispatch = function(filesaver, event_types, event) {
+        event_types = [].concat(event_types);
+        var i = event_types.length;
+        while (i--) {
+            var listener = filesaver["on" + event_types[i]];
+            if (typeof listener === "function") {
+                try {
+                    listener.call(filesaver, event || filesaver);
+                } catch (ex) {
+                    throw_outside(ex);
+                }
+            }
+        }
+    }, auto_bom = function(blob) {
+        // prepend BOM for UTF-8 XML and text/* types (including HTML)
+        // note: your browser will automatically convert UTF-16 U+FEFF to EF BB BF
+        if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
+            return new Blob([ String.fromCharCode(65279), blob ], {
+                type: blob.type
+            });
+        }
+        return blob;
+    }, FileSaver = function(blob, name, no_auto_bom) {
+        if (!no_auto_bom) {
+            blob = auto_bom(blob);
+        }
+        // First try a.download, then web filesystem, then object URLs
+        var filesaver = this, type = blob.type, force = type === force_saveable_type, object_url, dispatch_all = function() {
+            dispatch(filesaver, "writestart progress write writeend".split(" "));
+        }, fs_error = function() {
+            if ((is_chrome_ios || force && is_safari) && view.FileReader) {
+                // Safari doesn't allow downloading of blob urls
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                    var url = is_chrome_ios ? reader.result : reader.result.replace(/^data:[^;]*;/, "data:attachment/file;");
+                    var popup = view.open(url, "_blank");
+                    if (!popup) view.location.href = url;
+                    url = undefined;
+                    // release reference before dispatching
+                    filesaver.readyState = filesaver.DONE;
+                    dispatch_all();
+                };
+                reader.readAsDataURL(blob);
+                filesaver.readyState = filesaver.INIT;
+                return;
+            }
+            // don't create more object URLs than needed
+            if (!object_url) {
+                object_url = get_URL().createObjectURL(blob);
+            }
+            if (force) {
+                view.location.href = object_url;
+            } else {
+                var opened = view.open(object_url, "_blank");
+                if (!opened) {
+                    // Apple does not allow window.open, see https://developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
+                    view.location.href = object_url;
+                }
+            }
+            filesaver.readyState = filesaver.DONE;
+            dispatch_all();
+            revoke(object_url);
+        };
+        filesaver.readyState = filesaver.INIT;
+        if (can_use_save_link) {
+            object_url = get_URL().createObjectURL(blob);
+            setTimeout(function() {
+                save_link.href = object_url;
+                save_link.download = name;
+                click(save_link);
+                dispatch_all();
+                revoke(object_url);
+                filesaver.readyState = filesaver.DONE;
+            });
+            return;
+        }
+        fs_error();
+    }, FS_proto = FileSaver.prototype, saveAs = function(blob, name, no_auto_bom) {
+        return new FileSaver(blob, name || blob.name || "download", no_auto_bom);
+    };
+    // IE 10+ (native saveAs)
+    if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
+        return function(blob, name, no_auto_bom) {
+            name = name || blob.name || "download";
+            if (!no_auto_bom) {
+                blob = auto_bom(blob);
+            }
+            return navigator.msSaveOrOpenBlob(blob, name);
+        };
+    }
+    FS_proto.abort = function() {};
+    FS_proto.readyState = FS_proto.INIT = 0;
+    FS_proto.WRITING = 1;
+    FS_proto.DONE = 2;
+    FS_proto.error = FS_proto.onwritestart = FS_proto.onprogress = FS_proto.onwrite = FS_proto.onabort = FS_proto.onerror = FS_proto.onwriteend = null;
+    return saveAs;
+}(typeof self !== "undefined" && self || typeof window !== "undefined" && window || this.content);
+
+// `self` is undefined in Firefox for Android content script context
+// while `this` is nsIContentFrameMessageManager
+// with an attribute `content` that corresponds to the window
+if (typeof module !== "undefined" && module.exports) {
+    module.exports.saveAs = saveAs;
+} else if (typeof define !== "undefined" && define !== null && define.amd !== null) {
+    _p[2] = {
+        value: function() {
+            return saveAs;
+        }
+    };
+}
+
 //src/hotbox.js
-_p[2] = {
+_p[3] = {
     value: function(require, exports, module) {
         return module.exports = window.HotBox;
     }
 };
 
 //src/lang.js
-_p[3] = {
+_p[4] = {
     value: function(require, exports, module) {}
 };
 
 //src/minder.js
-_p[4] = {
+_p[5] = {
     value: function(require, exports, module) {
         return module.exports = window.kityminder.Minder;
     }
@@ -114,7 +264,7 @@ _p[4] = {
  * @Editor: Naixor
  * @Date: 2015.9.21
  */
-_p[5] = {
+_p[6] = {
     value: function(require, exports, module) {
         function MimeType() {
             /**
@@ -229,7 +379,7 @@ _p[5] = {
  * @Editor: Naixor
  * @Date: 2015.9.21
  */
-_p[6] = {
+_p[7] = {
     value: function(require, exports, module) {
         function ClipboardRuntime() {
             var minder = this.minder;
@@ -410,7 +560,7 @@ _p[6] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[7] = {
+_p[8] = {
     value: function(require, exports, module) {
         /**
      * 最先执行的 Runtime，初始化编辑器容器
@@ -441,10 +591,10 @@ _p[7] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[8] = {
+_p[9] = {
     value: function(require, exports, module) {
-        var Hotbox = _p.r(2);
-        var Debug = _p.r(19);
+        var Hotbox = _p.r(3);
+        var Debug = _p.r(20);
         var debug = new Debug("drag");
         function DragRuntime() {
             var fsm = this.fsm;
@@ -576,9 +726,9 @@ _p[8] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[9] = {
+_p[10] = {
     value: function(require, exports, module) {
-        var Debug = _p.r(19);
+        var Debug = _p.r(20);
         var debug = new Debug("fsm");
         function handlerConditionMatch(condition, when, exit, enter) {
             if (condition.when != when) return false;
@@ -684,9 +834,9 @@ _p[9] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[10] = {
+_p[11] = {
     value: function(require, exports, module) {
-        var jsonDiff = _p.r(22);
+        var jsonDiff = _p.r(23);
         function HistoryRuntime() {
             var minder = this.minder;
             var hotbox = this.hotbox;
@@ -772,10 +922,21 @@ _p[10] = {
             minder.on("contentchange", changed);
             minder.on("import", reset);
             minder.on("patch", updateSelection);
+            var buttonsLabel = {
+                "zh-CN": {
+                    undo: "撤销",
+                    redo: "重做"
+                },
+                en: {
+                    undo: "Undo",
+                    redo: "Redo"
+                }
+            };
+            var lang = window.DEFAULTLANG || localStorage["DEFAULTLANG"] || "zh-CN";
             var main = hotbox.state("main");
             main.button({
                 position: "top",
-                label: "撤销",
+                label: buttonsLabel[lang].undo,
                 key: "Ctrl + Z",
                 enable: hasUndo,
                 action: undo,
@@ -783,7 +944,7 @@ _p[10] = {
             });
             main.button({
                 position: "top",
-                label: "重做",
+                label: buttonsLabel[lang].redo,
                 key: "Ctrl + Y",
                 enable: hasRedo,
                 action: redo,
@@ -804,9 +965,9 @@ _p[10] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[11] = {
+_p[12] = {
     value: function(require, exports, module) {
-        var Hotbox = _p.r(2);
+        var Hotbox = _p.r(3);
         function HotboxRuntime() {
             var fsm = this.fsm;
             var minder = this.minder;
@@ -856,10 +1017,10 @@ _p[11] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[12] = {
+_p[13] = {
     value: function(require, exports, module) {
-        _p.r(21);
-        var Debug = _p.r(19);
+        _p.r(22);
+        var Debug = _p.r(20);
         var debug = new Debug("input");
         function InputRuntime() {
             var fsm = this.fsm;
@@ -868,6 +1029,15 @@ _p[12] = {
             var receiver = this.receiver;
             var receiverElement = receiver.element;
             var isGecko = window.kity.Browser.gecko;
+            var buttonsLabel = {
+                "zh-CN": {
+                    edit: "编辑"
+                },
+                en: {
+                    edit: "Edit"
+                }
+            };
+            var lang = window.DEFAULTLANG || localStorage["DEFAULTLANG"] || "zh-CN";
             // setup everything to go
             setupReciverElement();
             setupFsm();
@@ -925,7 +1095,7 @@ _p[12] = {
             function setupHotbox() {
                 hotbox.state("main").button({
                     position: "center",
-                    label: "编辑",
+                    label: buttonsLabel[lang].edit,
                     key: "F2",
                     enable: function() {
                         return minder.queryCommandState("text") != -1;
@@ -939,30 +1109,7 @@ _p[12] = {
          * @Date 2015-12-2
          */
             // edit for the selected node
-            function editText() {
-                var node = minder.getSelectedNode();
-                if (!node) {
-                    return;
-                }
-                var textContainer = receiverElement;
-                receiverElement.innerText = "";
-                if (node.getData("font-weight") === "bold") {
-                    var b = document.createElement("b");
-                    textContainer.appendChild(b);
-                    textContainer = b;
-                }
-                if (node.getData("font-style") === "italic") {
-                    var i = document.createElement("i");
-                    textContainer.appendChild(i);
-                    textContainer = i;
-                }
-                textContainer.innerText = minder.queryCommandValue("text");
-                if (isGecko) {
-                    receiver.fixFFCaretDisappeared();
-                }
-                fsm.jump("input", "input-request");
-                receiver.selectAll();
-            }
+            function editText() {}
             /**
          * 增加对字体的鉴别，以保证用户在编辑状态ctrl/cmd + b/i所触发的加粗斜体与显示一致
          * @editor Naixor
@@ -1220,9 +1367,9 @@ _p[12] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[13] = {
+_p[14] = {
     value: function(require, exports, module) {
-        var Hotbox = _p.r(2);
+        var Hotbox = _p.r(3);
         // Nice: http://unixpapa.com/js/key.html
         function isIntendToInput(e) {
             if (e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -1383,9 +1530,9 @@ _p[13] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[14] = {
+_p[15] = {
     value: function(require, exports, module) {
-        var Minder = _p.r(4);
+        var Minder = _p.r(5);
         function MinderRuntime() {
             // 不使用 kityminder 的按键处理，由 ReceiverRuntime 统一处理
             var minder = new Minder({
@@ -1405,7 +1552,7 @@ _p[14] = {
 };
 
 //src/runtime/node.js
-_p[15] = {
+_p[16] = {
     value: function(require, exports, module) {
         function NodeRuntime() {
             var runtime = this;
@@ -1413,7 +1560,21 @@ _p[15] = {
             var hotbox = this.hotbox;
             var fsm = this.fsm;
             var main = hotbox.state("main");
-            var buttons = [ "前移:Alt+Up:ArrangeUp", "下级:Tab|Insert:AppendChildNode", "同级:Enter:AppendSiblingNode", "后移:Alt+Down:ArrangeDown", "删除:Delete|Backspace:RemoveNode", "上级:Shift+Tab|Shift+Insert:AppendParentNode" ];
+            // var buttons = [
+            //     '前移:Alt+Up:ArrangeUp',
+            //     '下级:Tab|Insert:AppendChildNode',
+            //     '同级:Enter:AppendSiblingNode',
+            //     '后移:Alt+Down:ArrangeDown',
+            //     '删除:Delete|Backspace:RemoveNode',
+            //     '上级:Shift+Tab|Shift+Insert:AppendParentNode'
+            //     //'全选:Ctrl+A:SelectAll'
+            // ];
+            var buttons = {
+                "zh-CN": [ "前移:Alt+Up:ArrangeUp", "下级:Tab|Insert:AppendChildNode", "同级:Enter:AppendSiblingNode", "后移:Alt+Down:ArrangeDown", "删除:Delete|Backspace:RemoveNode", "上级:Shift+Tab|Shift+Insert:AppendParentNode" ],
+                en: [ "Arrange up:Alt+Up:ArrangeUp", "Append child node:Tab|Insert:AppendChildNode", "Append sibling node:Enter:AppendSiblingNode", "Arrange down:Alt+Down:ArrangeDown", "Remove node:Delete|Backspace:RemoveNode", "Append parent node:Shift+Tab|Shift+Insert:AppendParentNode" ]
+            };
+            var lang = window.DEFAULTLANG || localStorage["DEFAULTLANG"] || "zh-CN";
+            buttons = buttons[lang];
             var AppendLock = 0;
             buttons.forEach(function(button) {
                 var parts = button.split(":");
@@ -1446,9 +1607,19 @@ _p[15] = {
                     }
                 });
             });
+            var buttonsLabel = {
+                "zh-CN": {
+                    "import": "导入节点",
+                    "export": "导出节点"
+                },
+                en: {
+                    "import": "Import node data",
+                    "export": "Export node data"
+                }
+            };
             main.button({
                 position: "bottom",
-                label: "导入节点",
+                label: buttonsLabel[lang].import,
                 key: "Alt + V",
                 enable: function() {
                     var selectedNodes = minder.getSelectedNodes();
@@ -1459,7 +1630,7 @@ _p[15] = {
             });
             main.button({
                 position: "bottom",
-                label: "导出节点",
+                label: buttonsLabel[lang].export,
                 key: "Alt + C",
                 enable: function() {
                     var selectedNodes = minder.getSelectedNodes();
@@ -1480,15 +1651,28 @@ _p[15] = {
 };
 
 //src/runtime/priority.js
-_p[16] = {
+_p[17] = {
     value: function(require, exports, module) {
         function PriorityRuntime() {
             var minder = this.minder;
             var hotbox = this.hotbox;
             var main = hotbox.state("main");
+            var buttonsLabel = {
+                "zh-CN": {
+                    priority: "优先级",
+                    remove: "移除",
+                    back: "返回"
+                },
+                en: {
+                    priority: "Priority",
+                    remove: "Remove",
+                    back: "Back"
+                }
+            };
+            var lang = window.DEFAULTLANG || localStorage["DEFAULTLANG"] || "zh-CN";
             main.button({
                 position: "top",
-                label: "优先级",
+                label: buttonsLabel[lang].priority,
                 key: "P",
                 next: "priority",
                 enable: function() {
@@ -1508,7 +1692,7 @@ _p[16] = {
             });
             priority.button({
                 position: "center",
-                label: "移除",
+                label: buttonsLabel[lang].remove,
                 key: "Del",
                 action: function() {
                     minder.execCommand("Priority", 0);
@@ -1516,7 +1700,7 @@ _p[16] = {
             });
             priority.button({
                 position: "top",
-                label: "返回",
+                label: buttonsLabel[lang].back,
                 key: "esc",
                 next: "back"
             });
@@ -1526,15 +1710,28 @@ _p[16] = {
 };
 
 //src/runtime/progress.js
-_p[17] = {
+_p[18] = {
     value: function(require, exports, module) {
         function ProgressRuntime() {
             var minder = this.minder;
             var hotbox = this.hotbox;
             var main = hotbox.state("main");
+            var buttonsLabel = {
+                "zh-CN": {
+                    progress: "进度",
+                    remove: "移除",
+                    back: "返回"
+                },
+                en: {
+                    progress: "Progress",
+                    remove: "Remove",
+                    back: "Back"
+                }
+            };
+            var lang = window.DEFAULTLANG || localStorage["DEFAULTLANG"] || "zh-CN";
             main.button({
                 position: "top",
-                label: "进度",
+                label: buttonsLabel[lang].progress,
                 key: "G",
                 next: "progress",
                 enable: function() {
@@ -1554,7 +1751,7 @@ _p[17] = {
             });
             progress.button({
                 position: "center",
-                label: "移除",
+                label: buttonsLabel[lang].remove,
                 key: "Del",
                 action: function() {
                     minder.execCommand("Progress", 0);
@@ -1562,7 +1759,7 @@ _p[17] = {
             });
             progress.button({
                 position: "top",
-                label: "返回",
+                label: buttonsLabel[lang].back,
                 key: "esc",
                 next: "back"
             });
@@ -1580,10 +1777,10 @@ _p[17] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[18] = {
+_p[19] = {
     value: function(require, exports, module) {
-        var key = _p.r(23);
-        var hotbox = _p.r(2);
+        var key = _p.r(24);
+        var hotbox = _p.r(3);
         function ReceiverRuntime() {
             var fsm = this.fsm;
             var minder = this.minder;
@@ -1715,9 +1912,9 @@ _p[18] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[19] = {
+_p[20] = {
     value: function(require, exports, module) {
-        var format = _p.r(20);
+        var format = _p.r(21);
         function noop() {}
         function stringHash(str) {
             var hash = 0;
@@ -1746,7 +1943,7 @@ _p[19] = {
 };
 
 //src/tool/format.js
-_p[20] = {
+_p[21] = {
     value: function(require, exports, module) {
         function format(template, args) {
             if (typeof args != "object") {
@@ -1769,7 +1966,7 @@ _p[20] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[21] = {
+_p[22] = {
     value: function(require, exports, module) {
         if (!("innerText" in document.createElement("a")) && "getSelection" in window) {
             HTMLElement.prototype.__defineGetter__("innerText", function() {
@@ -1816,7 +2013,7 @@ _p[21] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[22] = {
+_p[23] = {
     value: function(require, exports, module) {
         /*!
     * https://github.com/Starcounter-Jack/Fast-JSON-Patch
@@ -1902,9 +2099,9 @@ _p[22] = {
 };
 
 //src/tool/key.js
-_p[23] = {
+_p[24] = {
     value: function(require, exports, module) {
-        var keymap = _p.r(24);
+        var keymap = _p.r(25);
         var CTRL_MASK = 4096;
         var ALT_MASK = 8192;
         var SHIFT_MASK = 16384;
@@ -1973,7 +2170,7 @@ _p[23] = {
 };
 
 //src/tool/keymap.js
-_p[24] = {
+_p[25] = {
     value: function(require, exports, module) {
         var keymap = {
             Shift: 16,
@@ -2074,7 +2271,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/arrange/arrange.html',
-    "<div class=\"km-btn-group arrange-group\"><div class=\"km-btn-item arrange-up\" ng-disabled=\"minder.queryCommandState('ArrangeUp') === -1\" ng-click=\"minder.queryCommandState('ArrangeUp') === -1 || minder.execCommand('ArrangeUp')\" title=\"{{ 'arrangeup' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangeup' | lang:'ui/command' }}</span></div><div class=\"km-btn-item arrange-down\" ng-disabled=\"minder.queryCommandState('ArrangeDown') === -1\" ng-click=\"minder.queryCommandState('ArrangeDown') === -1 || minder.execCommand('ArrangeDown');\" title=\"{{ 'arrangedown' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangedown' | lang:'ui/command' }}</span></div></div>"
+    "<div class=\"km-btn-group arrange-group\"><div class=\"km-btn-item arrange-up\" ng-disabled=\"minder.queryCommandState('ArrangeUp') === -1\" ng-click=\"minder.queryCommandState('ArrangeUp') === -1 || minder.execCommand('ArrangeUp')\" title=\"{{ 'arrangeup' | lang:'ui/command' }}\"><span class=\"km-btn-caption\">{{ 'arrangeup' | lang:'ui/command' }}</span></div><div class=\"km-btn-item\"><span>&middot;</span></div><div class=\"km-btn-item arrange-down\" ng-disabled=\"minder.queryCommandState('ArrangeDown') === -1\" ng-click=\"minder.queryCommandState('ArrangeDown') === -1 || minder.execCommand('ArrangeDown');\" title=\"{{ 'arrangedown' | lang:'ui/command' }}\"><span class=\"km-btn-caption\">{{ 'arrangedown' | lang:'ui/command' }}</span></div></div>"
   );
 
 
@@ -2084,22 +2281,22 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/expandLevel/expandLevel.html',
-    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default expand\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"minder.execCommand('ExpandToLevel', 9999)\"></button> <button type=\"button\" class=\"btn btn-default expand-caption dropdown-toggle\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'expandtoleaf' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'expandtoleaf' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li ng-repeat=\"level in levels\"><a href ng-click=\"minder.execCommand('ExpandToLevel', level)\">{{ 'expandtolevel' + level | lang:'ui/command' }}</a></li></ul></div>"
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"uex-icon-hdfs\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"minder.execCommand('ExpandToLevel', 9999)\"></button> <button type=\"button\" class=\"btn btn-default expand-caption dropdown-toggle\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'expandtoleaf' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'expandtoleaf' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li ng-repeat=\"level in levels\"><a href ng-click=\"minder.execCommand('ExpandToLevel', level)\">{{ 'expandtolevel' + level | lang:'ui/command' }}</a></li></ul></div>"
   );
 
 
   $templateCache.put('ui/directive/fontOperator/fontOperator.html',
-    "<div class=\"font-operator\"><div class=\"dropdown font-family-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontfamily') === -1\"><a href class=\"current-font-family\" title=\"{{ 'fontfamily' | lang: 'ui' }}\">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || '字体' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontFamilyList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontfamily', f.val)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontfamily') }\" ng-style=\"{'font-family': f.val }\">{{ f.name }}</a></li></ul></div><div class=\"dropdown font-size-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontsize') === -1\"><a href class=\"current-font-size\" title=\"{{ 'fontsize' | lang: 'ui' }}\">{{ minder.queryCommandValue('fontsize') || '字号' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontSizeList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontsize', f)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontsize') }\" ng-style=\"{'font-size': f + 'px'}\">{{ f }}</a></li></ul></div><span class=\"s-btn-icon font-bold\" ng-click=\"minder.queryCommandState('bold') === -1 || minder.execCommand('bold')\" ng-class=\"{'font-bold-selected' : minder.queryCommandState('bold') == 1}\" ng-disabled=\"minder.queryCommandState('bold') === -1\"></span> <span class=\"s-btn-icon font-italics\" ng-click=\"minder.queryCommandState('italic') === -1 || minder.execCommand('italic')\" ng-class=\"{'font-italics-selected' : minder.queryCommandState('italic') == 1}\" ng-disabled=\"minder.queryCommandState('italic') === -1\"></span><div class=\"font-color-wrap\"><span class=\"quick-font-color\" ng-click=\"minder.queryCommandState('forecolor') === -1 || minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\">A</span> <span color-picker class=\"font-color\" set-color=\"setDefaultColor()\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"><span class=\"caret\"></span></span> <span class=\"font-color-preview\" ng-style=\"{ 'background-color': foreColor }\" ng-click=\"minder.queryCommandState('forecolor') === -1 || minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"></span></div><color-panel minder=\"minder\" class=\"inline-directive\"></color-panel></div>"
+    "<div class=\"font-operator\"><div class=\"dropdown font-family-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontfamily') === -1\"><a href class=\"current-font-family\" title=\"{{ 'fontfamily' | lang: 'ui' }}\">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || ('fontfamily' | lang:'ui') }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontFamilyList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontfamily', f.val)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontfamily') }\" ng-style=\"{'font-family': f.val }\">{{ f.name }}</a></li></ul></div><div class=\"dropdown font-size-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontsize') === -1\"><a href class=\"current-font-size\" title=\"{{ 'fontsize' | lang: 'ui' }}\">{{ minder.queryCommandValue('fontsize') || ('fontsize' | lang:'ui') }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontSizeList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontsize', f)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontsize') }\" ng-style=\"{'font-size': f + 'px'}\">{{ f }}</a></li></ul></div><span class=\"font-bold\" ng-click=\"minder.queryCommandState('bold') === -1 || minder.execCommand('bold')\" ng-class=\"{'font-bold-selected' : minder.queryCommandState('bold') == 1}\" ng-disabled=\"minder.queryCommandState('bold') === -1\">&Beta;</span> <span class=\"font-italics\" ng-click=\"minder.queryCommandState('italic') === -1 || minder.execCommand('italic')\" ng-class=\"{'font-italics-selected' : minder.queryCommandState('italic') == 1}\" ng-disabled=\"minder.queryCommandState('italic') === -1\"><i>&Iota;</i></span><div class=\"font-color-wrap\"><span class=\"quick-font-color\" ng-click=\"minder.queryCommandState('forecolor') === -1 || minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\">A</span> <span color-picker class=\"font-color\" set-color=\"setDefaultColor()\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"><span class=\"caret\"></span></span> <span class=\"font-color-preview\" ng-style=\"{ 'background-color': foreColor }\" ng-click=\"minder.queryCommandState('forecolor') === -1 || minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"></span></div><color-panel minder=\"minder\" class=\"inline-directive\"></color-panel></div>"
   );
 
 
   $templateCache.put('ui/directive/hyperLink/hyperLink.html',
-    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default hyperlink\" title=\"{{ 'link' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"addHyperlink()\" ng-disabled=\"minder.queryCommandState('HyperLink') === -1\"></button> <button type=\"button\" class=\"btn btn-default hyperlink-caption dropdown-toggle\" ng-disabled=\"minder.queryCommandState('HyperLink') === -1\" title=\"{{ 'link' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'link' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'link' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li><a href ng-click=\"addHyperlink()\">{{ 'insertlink' | lang:'ui' }}</a></li><li><a href ng-click=\"minder.execCommand('HyperLink', null)\">{{ 'removelink' | lang:'ui' }}</a></li></ul></div>"
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default hyperlink-caption dropdown-toggle\" ng-disabled=\"minder.queryCommandState('HyperLink') === -1\" title=\"{{ 'link' | lang:'ui' }}\" dropdown-toggle><span class=\"uex-icon-attachment\"></span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'link' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li><a href ng-click=\"addHyperlink()\">{{ 'insertlink' | lang:'ui' }}</a></li><li><a href ng-click=\"minder.execCommand('HyperLink', null)\">{{ 'removelink' | lang:'ui' }}</a></li></ul></div>"
   );
 
 
   $templateCache.put('ui/directive/imageBtn/imageBtn.html',
-    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default image-btn\" title=\"{{ 'image' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"addImage()\" ng-disabled=\"minder.queryCommandState('Image') === -1\"></button> <button type=\"button\" class=\"btn btn-default image-btn-caption dropdown-toggle\" ng-disabled=\"minder.queryCommandState('Image') === -1\" title=\"{{ 'image' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'image' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'image' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li><a href ng-click=\"addImage()\">{{ 'insertimage' | lang:'ui' }}</a></li><li><a href ng-click=\"minder.execCommand('Image', '')\">{{ 'removeimage' | lang:'ui' }}</a></li></ul></div>"
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default image-btn-caption dropdown-toggle\" ng-disabled=\"minder.queryCommandState('Image') === -1\" title=\"{{ 'image' | lang:'ui' }}\" dropdown-toggle><span class=\"uex-icon-image\"></span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'image' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li><a href ng-click=\"addImage()\">{{ 'insertimage' | lang:'ui' }}</a></li><li><a href ng-click=\"minder.execCommand('Image', '')\">{{ 'removeimage' | lang:'ui' }}</a></li></ul></div>"
   );
 
 
@@ -2109,25 +2306,25 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/kityminderViewer/kityminderViewer.html',
-    "<div class=\"minder-editor-container\"><div class=\"minder-viewer\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div><div class=\"navigator\" navigator minder=\"minder\" ng-if=\"minder\"></div></div>"
+    "<div class=\"minder-editor-container\"><div class=\"minder-viewer\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div></div>"
   );
 
 
   $templateCache.put('ui/directive/layout/layout.html',
-    "<div class=\"readjust-layout\"><a ng-click=\"minder.queryCommandState('resetlayout') === -1 || minder.execCommand('resetlayout')\" class=\"btn-wrap\" ng-disabled=\"minder.queryCommandState('resetlayout') === -1\"><span class=\"btn-icon reset-layout-icon\"></span> <span class=\"btn-label\">{{ 'resetlayout' | lang: 'ui/command' }}</span></a></div>"
+    "<div class=\"readjust-layout\"><a title=\"{{ 'resetlayout' | lang: 'ui/command' }}\" ng-click=\"minder.queryCommandState('resetlayout') === -1 || minder.execCommand('resetlayout')\" class=\"btn-wrap\" ng-disabled=\"minder.queryCommandState('resetlayout') === -1\"><span class=\"uex-icon-view-changed\"></span> <span class=\"btn-label\"></span></a></div>"
   );
 
 
   $templateCache.put('ui/directive/navigator/navigator.html',
-    "<div class=\"nav-bar\"><div class=\"nav-btn zoom-in\" ng-click=\"minder.execCommand('zoomIn')\" title=\"{{ 'zoom-in' | lang : 'ui' }}\" ng-class=\"{ 'active' : getZoomRadio(zoom) == 0 }\"><div class=\"icon\"></div></div><div class=\"zoom-pan\"><div class=\"origin\" ng-style=\"{'transform': 'translate(0, ' + getHeight(100) + 'px)'}\" ng-click=\"minder.execCommand('zoom', 100);\"></div><div class=\"indicator\" ng-style=\"{\n" +
+    "<div class=\"nav-bar\"><div class=\"nav-btn zoom-in\" ng-click=\"minder.execCommand('zoomIn')\" title=\"{{ 'zoom-in' | lang : 'ui' }}\" ng-class=\"{ 'active' : getZoomRadio(zoom) == 0 }\"><div class=\"uex-icon-plus\"></div></div><div class=\"zoom-pan\"><div class=\"origin\" ng-style=\"{'transform': 'translate(0, ' + getHeight(100) + 'px)'}\" ng-click=\"minder.execCommand('zoom', 100);\"></div><div class=\"indicator\" ng-style=\"{\n" +
     "             'transform': 'translate(0, ' + getHeight(zoom) + 'px)',\n" +
     "             'transition': 'transform 200ms'\n" +
-    "             }\"></div></div><div class=\"nav-btn zoom-out\" ng-click=\"minder.execCommand('zoomOut')\" title=\"{{ 'zoom-out' | lang : 'ui' }}\" ng-class=\"{ 'active' : getZoomRadio(zoom) == 1 }\"><div class=\"icon\"></div></div><div class=\"nav-btn hand\" ng-click=\"minder.execCommand('hand')\" title=\"{{ 'hand' | lang : 'ui' }}\" ng-class=\"{ 'active' : minder.queryCommandState('hand') == 1 }\"><div class=\"icon\"></div></div><div class=\"nav-btn camera\" ng-click=\"minder.execCommand('camera', minder.getRoot(), 600);\" title=\"{{ 'camera' | lang : 'ui' }}\"><div class=\"icon\"></div></div><div class=\"nav-btn nav-trigger\" ng-class=\"{'active' : isNavOpen}\" ng-click=\"toggleNavOpen()\" title=\"{{ 'navigator' | lang : 'ui' }}\"><div class=\"icon\"></div></div></div><div class=\"nav-previewer\" ng-show=\"isNavOpen\"></div>"
+    "             }\"></div></div><div class=\"nav-btn zoom-out\" ng-click=\"minder.execCommand('zoomOut')\" title=\"{{ 'zoom-out' | lang : 'ui' }}\" ng-class=\"{ 'active' : getZoomRadio(zoom) == 1 }\"><div class=\"uex-icon-minus\"></div></div><div class=\"nav-btn hand\" ng-click=\"minder.execCommand('hand')\" title=\"{{ 'hand' | lang : 'ui' }}\" ng-class=\"{ 'active' : minder.queryCommandState('hand') == 1 }\"><div class=\"uex-icon-move\"></div></div><div class=\"nav-btn camera\" ng-click=\"minder.execCommand('camera', minder.getRoot(), 600);\" title=\"{{ 'camera' | lang : 'ui' }}\"><div class=\"uex-icon-position\"></div></div><div class=\"nav-btn nav-trigger\" ng-class=\"{'active' : isNavOpen}\" ng-click=\"toggleNavOpen()\" title=\"{{ 'navigator' | lang : 'ui' }}\"><div class=\"uex-icon-view\"></div></div></div><div class=\"nav-previewer\" ng-show=\"isNavOpen\"></div>"
   );
 
 
   $templateCache.put('ui/directive/noteBtn/noteBtn.html',
-    "<div class=\"btn-group-vertical note-btn-group\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default note-btn\" title=\"{{ 'note' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"addNote()\" ng-disabled=\"minder.queryCommandState('note') === -1\"></button> <button type=\"button\" class=\"btn btn-default note-btn-caption dropdown-toggle\" ng-disabled=\"minder.queryCommandState('note') === -1\" title=\"{{ 'note' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'note' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'note' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li><a href ng-click=\"addNote()\">{{ 'insertnote' | lang:'ui' }}</a></li><li><a href ng-click=\"minder.execCommand('note', null)\">{{ 'removenote' | lang:'ui' }}</a></li></ul></div>"
+    "<div class=\"btn-group-vertical note-btn-group\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default note-btn-caption dropdown-toggle\" ng-disabled=\"minder.queryCommandState('note') === -1\" title=\"{{ 'note' | lang:'ui' }}\" dropdown-toggle><span class=\"uex-icon-task\"></span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'note' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li><a href ng-click=\"addNote()\">{{ 'insertnote' | lang:'ui' }}</a></li><li><a href ng-click=\"minder.execCommand('note', null)\">{{ 'removenote' | lang:'ui' }}</a></li></ul></div>"
   );
 
 
@@ -2149,12 +2346,12 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/operation/operation.html',
-    "<div class=\"km-btn-group operation-group\"><div class=\"km-btn-item edit-node\" ng-disabled=\"minder.queryCommandState('text') === -1\" ng-click=\"minder.queryCommandState('text') === -1 || editNode()\" title=\"{{ 'editnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'editnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item remove-node\" ng-disabled=\"minder.queryCommandState('RemoveNode') === -1\" ng-click=\"minder.queryCommandState('RemoveNode') === -1 || minder.execCommand('RemoveNode');\" title=\"{{ 'removenode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'removenode' | lang:'ui/command' }}</span></div></div>"
+    "<div class=\"km-btn-group operation-group\"><div class=\"km-btn-item remove-node\" ng-disabled=\"minder.queryCommandState('RemoveNode') === -1\" ng-click=\"minder.queryCommandState('RemoveNode') === -1 || minder.execCommand('RemoveNode');\" title=\"{{ 'removenode' | lang:'ui/command' }}\"><span class=\"uex-icon-delete\"></span></div><input type=\"file\" id=\"files\" style=\"display:none\" onchange=\"minderImportData()\"></div>"
   );
 
 
   $templateCache.put('ui/directive/priorityEditor/priorityEditor.html',
-    "<ul class=\"km-priority tool-group\" ng-disabled=\"commandDisabled\"><li class=\"km-priority-item tool-group-item\" ng-repeat=\"p in priorities\" ng-click=\"commandDisabled || minder.execCommand('priority', p)\" ng-class=\"{ active: commandValue == p }\" title=\"{{ getPriorityTitle(p) }}\"><div class=\"km-priority-icon tool-group-icon priority-{{p}}\"></div></li></ul>"
+    "<ul class=\"km-priority tool-group\" ng-disabled=\"commandDisabled\"><li class=\"km-priority-item tool-group-item\" ng-repeat=\"p in priorities\" ng-click=\"commandDisabled || minder.execCommand('priority', p)\" ng-class=\"{ active: commandValue == p }\" title=\"{{ ('priority' | lang:'panels') + p }}\"><div class=\"km-priority-icon tool-group-icon priority-{{p}}\"></div></li></ul>"
   );
 
 
@@ -2164,7 +2361,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/resourceEditor/resourceEditor.html',
-    "<div class=\"resource-editor\"><div class=\"input-group\"><input class=\"form-control\" type=\"text\" ng-model=\"newResourceName\" ng-required ng-keypress=\"$event.keyCode == 13 && addResource(newResourceName)\" ng-disabled=\"!enabled\"> <span class=\"input-group-btn\"><button class=\"btn btn-default\" ng-click=\"addResource(newResourceName)\" ng-disabled=\"!enabled\">添加</button></span></div><div class=\"resource-dropdown clearfix\" id=\"resource-dropdown\"><ul class=\"km-resource\" ng-init=\"resourceListOpen = false\" ng-class=\"{'open': resourceListOpen}\"><li ng-repeat=\"resource in used\" ng-disabled=\"!enabled\" ng-blur=\"blurCB()\"><label style=\"background: {{resourceColor(resource.name)}}\"><input type=\"checkbox\" ng-model=\"resource.selected\" ng-disabled=\"!enabled\"> <span>{{resource.name}}</span></label></li></ul><div class=\"resource-caret\" click-anywhere-but-here=\"resourceListOpen = false\" is-active=\"resourceListOpen\" ng-click=\"resourceListOpen = !resourceListOpen\"><span class=\"caret\"></span></div></div></div>"
+    "<div class=\"resource-editor\"><div class=\"input-group\"><input class=\"form-control\" type=\"text\" ng-model=\"newResourceName\" ng-required ng-keypress=\"$event.keyCode == 13 && addResource(newResourceName)\" ng-disabled=\"!enabled\"> <span class=\"input-group-btn\"><button class=\"btn btn-default\" ng-click=\"addResource(newResourceName)\" ng-disabled=\"!enabled\"><span class=\"uex-icon-add\"></span></button></span></div><div class=\"resource-dropdown clearfix\" id=\"resource-dropdown\"><ul class=\"km-resource\" ng-init=\"resourceListOpen = false\" ng-class=\"{'open': resourceListOpen}\"><li ng-repeat=\"resource in used\" ng-disabled=\"!enabled\" ng-blur=\"blurCB()\"><label style=\"background: {{resourceColor(resource.name)}}\"><input type=\"checkbox\" ng-model=\"resource.selected\" ng-disabled=\"!enabled\"> <span>{{resource.name}}</span></label></li></ul></div></div>"
   );
 
 
@@ -2174,12 +2371,17 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/searchBtn/searchBtn.html',
-    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default search\" title=\"{{ 'search' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"enterSearch()\"></button> <button type=\"button\" class=\"btn btn-default search-caption dropdown-toggle\" ng-click=\"enterSearch()\" title=\"{{ 'search' | lang:'ui' }}\"><span class=\"caption\">{{ 'search' | lang:'ui' }}</span> <span class=\"sr-only\">{{ 'search' | lang:'ui' }}</span></button></div>"
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default search-caption dropdown-toggle\" ng-click=\"enterSearch()\" title=\"{{ 'search' | lang:'ui' }}\"><span class=\"uex-icon-search\"></span> <span class=\"sr-only\">{{ 'search' | lang:'ui' }}</span></button></div>"
   );
 
 
   $templateCache.put('ui/directive/selectAll/selectAll.html',
-    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default select\" title=\"{{ 'selectall' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"select['all']()\"></button> <button type=\"button\" class=\"btn btn-default select-caption dropdown-toggle\" title=\"{{ 'selectall' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'selectall' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'selectall' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li ng-repeat=\"item in items\"><a href ng-click=\"select[item]()\">{{ 'select' + item | lang:'ui' }}</a></li></ul></div>"
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"uex-icon-data-open-approval\" title=\"{{ 'selectall' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"select['all']()\"></button> <button type=\"button\" class=\"btn btn-default select-caption dropdown-toggle\" title=\"{{ 'selectall' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'selectall' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'selectall' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li ng-repeat=\"item in items\"><a href ng-click=\"select[item]()\">{{ 'select' + item | lang:'ui' }}</a></li></ul></div>"
+  );
+
+
+  $templateCache.put('ui/directive/senior/senior.html',
+    "<div class=\"btn-group-vertical senior\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default note-btn-caption dropdown-toggle\" title=\"{{ 'senior' | lang:'ui' }}\" ng-click=\"showDrop($event)\"><span>{{ 'senior' | lang:'ui' }}</span> <span class=\"caret\"></span></button><div class=\"senior-drop-menu\" ng-click=\"showDropMenu($event)\" style=\"display: none\"><priority-editor minder=\"minder\"></priority-editor><template-list minder=\"minder\" class=\"inline-directive\"></template-list><resource-editor minder=\"minder\"></resource-editor><expand-level minder=\"minder\"></expand-level><select-all minder=\"minder\"></select-all></div></div>"
   );
 
 
@@ -2199,12 +2401,12 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/topTab/topTab.html',
-    "<tabset><tab heading=\"{{ 'idea' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('idea')\" select=\"setCurTab('idea')\"><undo-redo editor=\"editor\"></undo-redo><append-node minder=\"minder\"></append-node><arrange minder=\"minder\"></arrange><operation minder=\"minder\"></operation><hyper-link minder=\"minder\"></hyper-link><image-btn minder=\"minder\"></image-btn><note-btn minder=\"minder\"></note-btn><priority-editor minder=\"minder\"></priority-editor><progress-editor minder=\"minder\"></progress-editor><resource-editor minder=\"minder\"></resource-editor></tab><tab heading=\"{{ 'appearence' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('appearance')\" select=\"setCurTab('appearance')\"><template-list minder=\"minder\" class=\"inline-directive\"></template-list><theme-list minder=\"minder\"></theme-list><layout minder=\"minder\" class=\"inline-directive\"></layout><style-operator minder=\"minder\" class=\"inline-directive\"></style-operator><font-operator minder=\"minder\" class=\"inline-directive\"></font-operator></tab><tab heading=\"{{ 'view' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('view')\" select=\"setCurTab('view')\"><expand-level minder=\"minder\"></expand-level><select-all minder=\"minder\"></select-all><search-btn minder=\"minder\"></search-btn></tab></tabset>"
+    "<tabset><undo-redo editor=\"editor\"></undo-redo><operation minder=\"minder\"></operation><append-node minder=\"minder\"></append-node><arrange minder=\"minder\"></arrange><search-btn minder=\"minder\"></search-btn><layout minder=\"minder\" class=\"inline-directive\"></layout><font-operator minder=\"minder\" class=\"inline-directive\"></font-operator><senior minder=\"minder\"></senior><hyper-link minder=\"minder\"></hyper-link></tabset>"
   );
 
 
   $templateCache.put('ui/directive/undoRedo/undoRedo.html',
-    "<div class=\"km-btn-group do-group\"><div class=\"km-btn-item undo\" ng-disabled=\"editor.history.hasUndo() == false\" ng-click=\"editor.history.hasUndo() == false || editor.history.undo();\" title=\"{{ 'undo' | lang:'ui' }}\"><i class=\"km-btn-icon\"></i></div><div class=\"km-btn-item redo\" ng-disabled=\"editor.history.hasRedo() == false\" ng-click=\"editor.history.hasRedo() == false || editor.history.redo()\" title=\"{{ 'redo' | lang:'ui' }}\"><i class=\"km-btn-icon\"></i></div></div>"
+    "<div class=\"km-btn-group do-group\"><div class=\"km-btn-item undo\" ng-disabled=\"editor.history.hasUndo() == false\" ng-click=\"editor.history.hasUndo() == false || editor.history.undo();\"><span class=\"uex-icon-reset\"></span></div><div class=\"km-btn-item redo\" ng-disabled=\"editor.history.hasRedo() == false\" ng-click=\"editor.history.hasRedo() == false || editor.history.redo()\"><span class=\"uex-icon-reset\"></span></div></div>"
   );
 
 
@@ -2240,6 +2442,29 @@ angular.module('kityminderEditor').service('commandBinder', function() {
 angular.module('kityminderEditor')
 	.provider('config',  function() {
 
+		var cookieFunc = {
+	    	setCookie: function(c_name,value,expiredays){
+	    		var exdate = new Date()
+	    		exdate.setDate(exdate.getDate()+expiredays)
+	    		document.cookie = c_name+ "=" +escape(value)+
+	    		((expiredays == null) ? "" : ";expires="+exdate.toGMTString())
+	    	},
+	    	getCookie: function getCookie(c_name){
+	    		if (document.cookie.length>0){
+	    		    var c_start = document.cookie.indexOf(c_name + "=")
+	    		    if (c_start != -1){ 
+	    		        c_start = c_start + c_name.length + 1;
+	    		        var c_end = document.cookie.indexOf(";", c_start)
+	    		        if (c_end == -1){
+	    		    	    c_end = document.cookie.length
+	    		        }
+	    		        return unescape(document.cookie.substring(c_start,c_end))
+	    		    } 
+	    	    }
+	    		return null
+	    	}
+	    }
+
 		this.config = {
 			// 右侧面板最小宽度
 			ctrlPanelMin: 250,
@@ -2251,7 +2476,7 @@ angular.module('kityminderEditor')
 			dividerWidth: 3,
 
 			// 默认语言
-			defaultLang: 'zh-cn',
+			defaultLang: window.DEFAULTLANG || localStorage['DEFAULTLANG'] || 'zh-CN',
 
 			// 放大缩小比例
 			zoom: [10, 20, 30, 50, 80, 100, 120, 150, 200],
@@ -2265,13 +2490,19 @@ angular.module('kityminderEditor')
             var configObj = {};
 
             // 支持全配置
+
             if (typeof key === 'object') {
                 configObj = key;
             }
             else {
                 configObj[key] = value;
             }
-
+            if(key=="defaultLang"){
+            	if(this.config["defaultLang"]!=value){
+            		cookieFunc.setCookie('DEFAULTLANG', value);
+            		window.location.reload();
+            	}
+            }
             for (var i in configObj) {
                 if (configObj.hasOwnProperty(i) && supported.indexOf(i) !== -1) {
                     this.config[i] = configObj[i];
@@ -2281,7 +2512,6 @@ angular.module('kityminderEditor')
                     return false;
                 }
             }
-
             return true;
 		};
 
@@ -2304,11 +2534,155 @@ angular.module('kityminderEditor')
 
 			};
 		}
+		window.minderConfig = this;
 	});
 angular.module('kityminderEditor')
-	.service('lang.zh-cn', function() {
+	.service('lang.i18n', function() {
 		return {
-			'zh-cn': {
+			'en': {
+				"template": {
+		            "default": "Mind Chart",
+		            "tianpan": "Weather Chart",
+		            "structure": "Organization Structure Chart",
+		            "filetree": "Menu Organization Chart",
+		            "right": "Logical Chart",
+		            "fish-bone": "Fish Bone Chart"
+		        },
+		        "maintopic": "Topic",
+		        "topic": "Branch Topic",
+		        "panels": {
+		            "theme": "Skin",
+		            "layout": "Layout",
+		            "style": "Style",
+		            "font": "Font",
+		            "color": "Color",
+		            "background": "Background",
+		            "insert": "Insert",
+		            "arrange": "Adjust",
+		            "nodeop": "Current",
+		            "priority": "Priority",
+		            "progress": "Progress",
+		            "resource": "Resource",
+		            "note": "Note",
+		            "attachment": "Attachment",
+		            "word": "Word"
+		        },
+		        "ui": {
+		            "command": {
+		                "appendsiblingnode": "Insert",
+		                "appendparentnode": "ParentNode Insert",
+		                "appendchildnode": "ChildNode Insert",
+		                "removenode": "Delete",
+		                "importnode": "Import",
+		                "exportnode": "Export",
+		                "editnode": "Edit",
+		                "arrangeup": "Bring Forward",
+		                "arrangedown": "Bring backward",
+		                "resetlayout": "Arrange Layout",
+		                "expandtoleaf": "Expand All Nodes",
+		                "expandtolevel1": "Expand To level1 Node",
+		                "expandtolevel2": "Expand To Level2 Node",
+		                "expandtolevel3": "Expand To Level3 Node",
+		                "expandtolevel4": "Expand To Level4 Node",
+		                "expandtolevel5": "Expand To Level5 Node",
+		                "expandtolevel6": "Expand To Level6 Node",
+		                "fullscreen": "Fullscreen",
+		                "outline": "Outline"
+		            },
+		            "search":"Search",
+		            "expandtoleaf": "Expand",
+		            "back": "Back",
+		            "undo": "Undo (Ctrl + Z)",
+		            "redo": "Redo (Ctrl + Y)",
+		            "bold": "Bold",
+		            "italic": "Italic",
+		            "forecolor": "Forecolor",
+		            "fontfamily": "Font",
+		            "fontsize": "Fontsize",
+		            "zoom-in": "Zoom In",
+		            "zoom-out": "Zoom Out",
+		            "markers": "Mark",
+		            "resource": "Resource",
+		            "help": "Help",
+		            "preference": "Preference",
+		            "expandnode": "Expand To Leaf",
+		            "collapsenode": "Collapse To Level1 Node",
+		            "template": "Template",
+		            "theme": "Skin",
+		            "clearstyle": "Clear Style",
+		            "copystyle": "Copy Styple",
+		            "pastestyle": "Paste Style",
+		            "appendsiblingnode": "Topic",
+		            "appendchildnode": "ChildNode Topic",
+		            "arrangeup": "Arrange Up",
+		            "arrangedown": "Arrange Down",
+		            "editnode": "Edit",
+		            "removenode": "Remove",
+		            "priority": "Priority",
+		            "link": "Link",
+		            "image": "Image",
+		            "note": "Node",
+		            "senior": "Senior",
+		            "insertlink": "Insert Link",
+		            "insertimage": "Insert Image",
+		            "insertnote": "Insert Note",
+		            "removelink": "Remove Links",
+		            "removeimage": "Remove Images",
+		            "removenote": "Remove Notes",
+		            "resetlayout": "Arrange",
+		            "selectall": "Select All",
+		            "selectrevert": "Revert",
+		            "selectsiblings": "Select Siblings",
+		            "selectlevel": "Select Node",
+		            "selectpath": "Select Path",
+		            "selecttree": "Select Tree"
+		        },
+		        "dialogs": {
+		            "markers": {
+		                "static": {
+		                    "lang_input_text": "Text：",
+		                    "lang_input_url": "URL_Address：",
+		                    "lang_input_title": "Title：",
+		                    "lang_input_target": "New Windows："
+		                },
+		                "priority": "Priority",
+		                "none": "None",
+		                "progress": {
+		                    "title": "Progress",
+		                    "notdone": "Going",
+		                    "done1": "Done 1/8",
+		                    "done2": "Done 1/4",
+		                    "done3": "Done 3/8",
+		                    "done4": "Done 1/2",
+		                    "done5": "Done 5/8",
+		                    "done6": "Done 3/4",
+		                    "done7": "Done 7/8",
+		                    "done": "Done"
+		                }
+		            },
+		            "help": {
+
+		            },
+		            "hyperlink": {},
+		            "image": {},
+		            "resource": {}
+		        },
+		        "hyperlink": {
+		            "hyperlink": "Link...",
+		            "unhyperlink": "Remove Link"
+		        },
+		        "image": {
+		            "image": "Image...",
+		            "removeimage": "Remove Image"
+		        },
+		        "marker": {
+		            "marker": "Progress..."
+		        },
+		        "resource": {
+		            "resource": "Resource..."
+		        }
+			},
+			'zh-CN': {
 				'template': {
 					'default': '思维导图',
 					'tianpan': '天盘图',
@@ -2450,6 +2824,7 @@ angular.module('kityminderEditor')
 					}
 				},
 				'ui': {
+					'senior': '高级',
 					'shared_file_title': '[分享的] {0} (只读)',
 					'load_share_for_edit': '正在加载分享的文件...',
 					'share_sync_success': '分享内容已同步',
@@ -2985,7 +3360,7 @@ angular.module('kityminderEditor')
 
 
 angular.module('kityminderEditor')
-	.filter('lang', ['config', 'lang.zh-cn', function(config, lang) {
+	.filter('lang', ['config', 'lang.i18n', function(config, lang) {
 		return function(text, block) {
 			var defaultLang = config.get('defaultLang');
 
@@ -4045,6 +4420,25 @@ angular.module('kityminderEditor')
             },
             replace: true,
             link: function($scope) {
+                var myBrowser = function(){
+                    var userAgent = navigator.userAgent;
+                    var isOpera = userAgent.indexOf("Opera") > -1;
+                    if (isOpera) {
+                        return "Opera"
+                    }; 
+                    if (userAgent.indexOf("Firefox") > -1) {
+                        return "FF";
+                    }
+                    if (userAgent.indexOf("Chrome") > -1){
+                        return "Chrome";
+                    }
+                    if (userAgent.indexOf("Safari") > -1) {
+                        return "Safari";
+                    }
+                    if (userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1 && !isOpera) {
+                        return "IE";
+                    }; //判断是否IE浏览器
+                };
                 $scope.editNode = function() {
 
                     var receiverElement = editor.receiver.element;
@@ -4055,6 +4449,36 @@ angular.module('kityminderEditor')
                     fsm.jump('input', 'input-request');
                     receiver.selectAll();
 
+                }
+                $scope.importnode = function() {
+                    //$(".operation-group #files").click();
+                    if(minder.importNode){
+                        minder.importNode();
+                    }
+                }
+                $scope.exportnode = function() {
+                    var _data = JSON.stringify(minder.exportJson());
+                    if(myBrowser()=="FF"||myBrowser()=="Chrome"){
+                        var file = new File([_data], "data.json", { type: "application/json;charset=utf-8" });
+                    }else{
+                        var file = new Blob([_data], {type : 'application/json;charset=utf-8'})
+                    }
+                    saveAs(file, "data.json");
+                }
+                window.minderImportData = function() {
+                    var selectedFile = document.getElementById("files").files[0];
+                    var name = selectedFile.name;
+                    var size = selectedFile.size;
+                    var reader = new FileReader();
+                    reader.readAsText(selectedFile);
+                    reader.onload = function(){
+                        try {
+                            minder.importJson(JSON.parse(this.result));
+                    　　 } catch(error) {
+                            console.error(error);
+                    　　 } finally {
+                    　　 } 
+                    };
                 }
 
             }
@@ -4464,6 +4888,41 @@ angular.module('kityminderEditor')
                         minder.fire('receiverfocus');
                     }
                 };
+            }
+        }
+    });
+angular.module('kityminderEditor')
+    .directive('senior', function() {
+        return {
+            restrict: 'E',
+            templateUrl: 'ui/directive/senior/senior.html',
+            scope: {
+                minder: '='
+            },
+            replace: true,
+            link: function($scope) {
+                $scope.dropDis = false;
+                var $seniorDropMenu = $('.senior-drop-menu');
+                $scope.showDrop = function(event){
+                    event.preventDefault();
+                    event.stopPropagation();
+                    $scope.dropDis = !$scope.dropDis;
+                    if($scope.dropDis){
+                        $seniorDropMenu.css("display", "block");
+                    }else{
+                        $seniorDropMenu.css("display", "none");
+                    }
+                }
+                $scope.showDropMenu = function(event){
+                    event.preventDefault();
+                    event.stopPropagation();
+                    $scope.dropDis = true;
+                    $seniorDropMenu.css("display", "block");
+                }
+                document.body.onclick=function(){ 
+                    $scope.dropDis = false;
+                    $seniorDropMenu.css("display", "none");
+                }; 
             }
         }
     });

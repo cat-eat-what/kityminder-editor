@@ -1,16 +1,19 @@
 <div class="km-btn-group operation-group">
-    <div class="km-btn-item edit-node"
-         ng-disabled="minder.queryCommandState('text') === -1"
-         ng-click="minder.queryCommandState('text') === -1 || editNode()"
-         title="{{ 'editnode' | lang:'ui/command' }}">
-        <i class="km-btn-icon"></i>
-        <span class="km-btn-caption">{{ 'editnode' | lang:'ui/command' }}</span>
+	<!-- <div class="km-btn-item import-node"
+         ng-click="importnode()"
+         title="{{ 'importnode' | lang:'ui/command' }}">
+        <span>{{ 'importnode' | lang:'ui/command' }}</span>
     </div>
+    <div class="km-btn-item export-node"
+         ng-click="exportnode()"
+         title="{{ 'exportnode' | lang:'ui/command' }}">
+        <span>{{ 'exportnode' | lang:'ui/command' }}</span>
+    </div> -->
     <div class="km-btn-item remove-node"
          ng-disabled="minder.queryCommandState('RemoveNode') === -1"
          ng-click="minder.queryCommandState('RemoveNode') === -1 || minder.execCommand('RemoveNode');"
          title="{{ 'removenode' | lang:'ui/command' }}">
-        <i class="km-btn-icon"></i>
-        <span class="km-btn-caption">{{ 'removenode' | lang:'ui/command' }}</span>
+        <span class="uex-icon-delete"></span>
     </div>
+    <input type="file" id="files" style="display:none" onchange="minderImportData()"/>
 </div>

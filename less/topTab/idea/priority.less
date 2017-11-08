@@ -1,17 +1,18 @@
 .priority-sprite(@count) when (@count >= 0) {
     .priority-sprite(@count - 1);
     &.priority-@{count} {
-        background-position: 0 (-20px * (@count - 1));
+        background-position: 0 (-19px * (@count - 1));
     }
 }
 
-.tab-content .km-priority {
+.senior-drop-menu .km-priority {
     vertical-align: middle;
     font-size: inherit;
     display: inline-block;
     width: 140px;
     margin: 5px;
     border-right: 1px dashed #eee;
+    white-space: initial;
 
     .km-priority-item {
         margin: 0 1px;
@@ -19,7 +20,7 @@
 
         .km-priority-icon {
             .priority-sprite(9);
-            background: url(images/iconpriority.png) repeat-y;
+            background: url(images/mark.png) repeat-y;
             background-color: transparent;
         }
   }

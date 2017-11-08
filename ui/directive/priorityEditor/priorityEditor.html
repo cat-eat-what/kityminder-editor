@@ -3,7 +3,7 @@
         ng-repeat="p in priorities"
         ng-click="commandDisabled || minder.execCommand('priority', p)"
 	    ng-class="{ active: commandValue == p }"
-        title="{{ getPriorityTitle(p) }}">
+        title="{{ ('priority' | lang:'panels') + p }}">
 	    <div class="km-priority-icon tool-group-icon priority-{{p}}"></div>
     </li>
 </ul>

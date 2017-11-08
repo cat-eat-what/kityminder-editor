@@ -8,15 +8,38 @@ define(function(require, exports, module) {
 
         var main = hotbox.state('main');
 
-        var buttons = [
-            '前移:Alt+Up:ArrangeUp',
-            '下级:Tab|Insert:AppendChildNode',
-            '同级:Enter:AppendSiblingNode',
-            '后移:Alt+Down:ArrangeDown',
-            '删除:Delete|Backspace:RemoveNode',
-            '上级:Shift+Tab|Shift+Insert:AppendParentNode'
-            //'全选:Ctrl+A:SelectAll'
-        ];
+
+        // var buttons = [
+        //     '前移:Alt+Up:ArrangeUp',
+        //     '下级:Tab|Insert:AppendChildNode',
+        //     '同级:Enter:AppendSiblingNode',
+        //     '后移:Alt+Down:ArrangeDown',
+        //     '删除:Delete|Backspace:RemoveNode',
+        //     '上级:Shift+Tab|Shift+Insert:AppendParentNode'
+        //     //'全选:Ctrl+A:SelectAll'
+        // ];
+        var buttons = {
+            'zh-CN': [
+                '前移:Alt+Up:ArrangeUp',
+                '下级:Tab|Insert:AppendChildNode',
+                '同级:Enter:AppendSiblingNode',
+                '后移:Alt+Down:ArrangeDown',
+                '删除:Delete|Backspace:RemoveNode',
+                '上级:Shift+Tab|Shift+Insert:AppendParentNode'
+            ],
+            'en': [
+                'Arrange up:Alt+Up:ArrangeUp',
+                'Append child node:Tab|Insert:AppendChildNode',
+                'Append sibling node:Enter:AppendSiblingNode',
+                'Arrange down:Alt+Down:ArrangeDown',
+                'Remove node:Delete|Backspace:RemoveNode',
+                'Append parent node:Shift+Tab|Shift+Insert:AppendParentNode'
+            ]
+        };
+
+        var lang = window.DEFAULTLANG || localStorage['DEFAULTLANG'] || 'zh-CN';
+
+        buttons = buttons[lang];
 
         var AppendLock = 0;
 
@@ -52,10 +75,20 @@ define(function(require, exports, module) {
                 }
             });
         });
+        var buttonsLabel = {
+            'zh-CN': {
+                'import': '导入节点',
+                'export': '导出节点'
+            },
+            'en': {
+                'import': 'Import node data',
+                'export': 'Export node data'
+            }
+        };
 
         main.button({
             position: 'bottom',
-            label: '导入节点',
+            label: buttonsLabel[lang].import,
             key: 'Alt + V',
             enable: function() {
                 var selectedNodes = minder.getSelectedNodes();
@@ -67,7 +100,7 @@ define(function(require, exports, module) {
 
         main.button({
             position: 'bottom',
-            label: '导出节点',
+            label: buttonsLabel[lang].export,
             key: 'Alt + C',
             enable: function() {
                 var selectedNodes = minder.getSelectedNodes();
