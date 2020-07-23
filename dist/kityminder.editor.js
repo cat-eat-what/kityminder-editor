@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor-w - v1.0.60 - 2020-07-23
+ * kityminder-editor-uex - v1.0.60 - 2020-07-23
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2020 ; Licensed 
