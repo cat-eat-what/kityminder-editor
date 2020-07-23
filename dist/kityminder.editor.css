@@ -441,7 +441,7 @@ div.minder-editor-container {
 .senior-drop-menu > div,
 .senior-drop-menu > ul {
   display: inline-block;
-  white-space: initial;
+  white-space: normal;
 }
 .senior-drop-menu button[class^="uex-icon-"] {
   border: 0px;
@@ -701,8 +701,7 @@ div.minder-editor-container {
   display: inline-block;
   width: 140px;
   margin: 5px;
-  border-right: 1px dashed #eee;
-  white-space: initial;
+  border-right: normal;
 }
 .senior-drop-menu .km-priority .km-priority-item {
   margin: 0 1px;
