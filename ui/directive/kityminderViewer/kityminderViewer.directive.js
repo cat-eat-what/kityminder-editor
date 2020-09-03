@@ -12,10 +12,15 @@ angular.module('kityminderEditor')
                 var $minderEditor = element.children('.minder-viewer')[0];
 
                 function onInit(editor, minder) {
-                    scope.onInit({
-                        editor: editor,
-                        minder: minder
-                    });
+                    if (attributes.onInit.indexOf('(') > 0) {
+                        scope.onInit({
+                            editor: editor,
+                            minder: minder
+                        });
+                    } else {
+                        var onInitFunc = scope.$parent.$eval(attributes.onInit);
+                        onInitFunc(editor, minder);
+                    }
 
                     minderService.executeCallback();
                 }

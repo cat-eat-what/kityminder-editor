@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor-uex - v1.0.60 - 2020-07-23
+ * kityminder-editor-uex - v1.0.61 - 2020-09-03
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2020 ; Licensed 
@@ -3896,10 +3896,15 @@ angular.module('kityminderEditor')
 				var $minderEditor = element.children('.minder-editor')[0];
 
 				function onInit(editor, minder) {
-					scope.onInit({
-						editor: editor,
-						minder: minder
-					});
+					if (attributes.onInit.indexOf('(') > 0) {
+						scope.onInit({
+							editor: editor,
+							minder: minder
+						});
+					} else {
+						var onInitFunc = scope.$parent.$eval(attributes.onInit);
+						onInitFunc(editor, minder);
+					}
 
 					minderService.executeCallback();
 				}
@@ -3910,7 +3915,9 @@ angular.module('kityminderEditor')
 						base: './src'
 					});
 
-					define('demo', function(require) {
+					var id = 'd' + String(new Date().getTime())
+
+					define(id, function(require) {
 						var Editor = require('editor');
 
 						var editor = window.editor = new Editor($minderEditor);
@@ -3935,7 +3942,7 @@ angular.module('kityminderEditor')
 						onInit(editor, minder);
 					});
 
-					seajs.use('demo');
+					seajs.use(id);
 
 				} else if (window.kityminder && window.kityminder.Editor) {
 					var editor = new kityminder.Editor($minderEditor);
@@ -3967,10 +3974,15 @@ angular.module('kityminderEditor')
                 var $minderEditor = element.children('.minder-viewer')[0];
 
                 function onInit(editor, minder) {
-                    scope.onInit({
-                        editor: editor,
-                        minder: minder
-                    });
+                    if (attributes.onInit.indexOf('(') > 0) {
+                        scope.onInit({
+                            editor: editor,
+                            minder: minder
+                        });
+                    } else {
+                        var onInitFunc = scope.$parent.$eval(attributes.onInit);
+                        onInitFunc(editor, minder);
+                    }
 
                     minderService.executeCallback();
                 }
@@ -4018,7 +4030,9 @@ angular.module('kityminderEditor')
             scope: {
                 minder: '='
             },
-            link: function(scope) {
+            link: function(scope, element) {
+                var minder = scope.minder;
+
                 minder.setDefaultOptions({zoom: config.get('zoom')});
 
                 scope.isNavOpen = !memory.get('navigator-hidden');
@@ -4033,7 +4047,7 @@ angular.module('kityminderEditor')
                 };
 
                 scope.getHeight = function(value) {
-                    var totalHeight = $('.zoom-pan').height();
+                    var totalHeight = element.find('.zoom-pan').height();
 
                     return scope.getZoomRadio(value) * totalHeight;
                 };
@@ -4085,7 +4099,7 @@ angular.module('kityminderEditor')
                 /**  以下部分是缩略图导航器 *
                  * */
 
-                var $previewNavigator = $('.nav-previewer');
+                var $previewNavigator = element.find('.nav-previewer');
 
                 // 画布，渲染缩略图
                 var paper = new kity.Paper($previewNavigator[0]);

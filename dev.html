@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>KityMinder Editor - Powered By FEX</title>
+
+	<link href="favicon.ico" type="image/x-icon" rel="shortcut icon">
+
+	<!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css" />
+    <link rel="stylesheet" href="bower_components/hotbox/hotbox.css" />
+    <link rel="stylesheet" href="bower_components/kityminder-core/dist/kityminder.core.css" />
+    <link rel="stylesheet" href="bower_components/color-picker/dist/color-picker.css" />
+    <link rel="stylesheet" href="bower_components/element-uex/element-uex.min.css" />
+	<!-- endbower -->
+
+	<link rel="stylesheet" href="dist/kityminder.editor.css">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        h1.editor-title {
+            background: #393F4F;
+            color: white;
+            margin: 0;
+            height: 40px;
+            font-size: 14px;
+            line-height: 40px;
+            font-family: 'Hiragino Sans GB', 'Arial', 'Microsoft Yahei';
+            font-weight: normal;
+            padding: 0 20px;
+        }
+        .test1 {
+            position: absolute;
+            top:0px;
+            left: 0px;
+            width: 500px;
+            height: 100%;
+        }
+
+        .test2 {
+            position: absolute;
+            top: 0px;
+            left: 500px;
+            width: 500px;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="test1" ng-controller="MainController">
+        <kityminder-editor on-init="initEditor(editor, minder)"></kityminder-editor>
+    </div>
+    <div class="test2" ng-controller="MainController">
+        <kityminder-editor on-init="initEditor(editor, minder)"></kityminder-editor>
+    </div>
+</body>
+
+<!-- bower:js -->
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+<script src="bower_components/codemirror/lib/codemirror.js"></script>
+<script src="bower_components/codemirror/mode/xml/xml.js"></script>
+<script src="bower_components/codemirror/mode/javascript/javascript.js"></script>
+<script src="bower_components/codemirror/mode/css/css.js"></script>
+<script src="bower_components/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="bower_components/codemirror/mode/markdown/markdown.js"></script>
+<script src="bower_components/codemirror/addon/mode/overlay.js"></script>
+<script src="bower_components/codemirror/mode/gfm/gfm.js"></script>
+<script src="bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
+<script src="bower_components/marked/lib/marked.js"></script>
+<script src="bower_components/kity/dist/kity.js"></script>
+<script src="bower_components/hotbox/hotbox.js"></script>
+<script src="bower_components/json-diff/json-diff.js"></script>
+<script src="bower_components/kityminder-core/dist/kityminder.core.js"></script>
+<script src="bower_components/color-picker/dist/color-picker.js"></script>
+<script src="bower_components/seajs/dist/sea.js"></script>
+<script src="src/fileSaver.js"></script>
+<script src="data.js"></script>
+<!-- endbower -->
+
+<script src="dist/kityminder.editor.js"></script>
+
+
+<script>
+    var testJson = {
+        "root": {
+            "data": {
+               "id": "123abcABC",
+                "text": "ccccc",
+                "note": "hahahhha"
+            },
+            "children": [ 
+                {
+                    "data": {
+                        "id": "1",
+                        "text": "主题",
+                        "note": "主题",
+                        "subjectType": "topic",
+                        "attribute": {
+                            "label": "主题",
+                            "name": "topic",
+                            "descr": ""
+                        },
+                        "parentId": "0",
+                        "isRemove": false
+                    },
+                    "children": []
+                }
+            ]
+        },
+        "template": "default",
+        "theme": "fresh-blue",
+        "version": "1.4.43"
+    }
+    angular.module('kityminderDemo1', ['kityminderEditor'])
+	.controller('MainController', function($scope) {
+        // console.log('kityminderDemo1');
+        // console.log($scope);
+		$scope.initEditor = function(editor, minder) {
+            // console.log('kityminderDemo1', editor, minder);
+			window.editor1 = editor;
+			window.minder1 = minder;
+
+            minder1.importJson(test1Json);
+            minder1.on('dblclick', function() {
+                if (minder1.getSelectedNode() && minder1._status !== 'readonly') {
+                    console.log(minder1.getSelectedNode());
+                }
+            });
+            minder1.execCommand('template', 'filetree');
+            /*minder._commands.removenode.execute(minder, function(removeFun){
+                removeFun(minder);
+            })*/
+            var appendchildnodeExec = minder1._commands.appendchildnode.execute;
+            minder1._commands.appendchildnode.execute = function(){
+                console.log('appendchildnode');
+                console.log(minder.getSelectedNode());
+                appendchildnodeExec(minder, '分支主题');
+            }
+            var appendsiblingnodeExec = minder1._commands.appendsiblingnode.execute;
+            minder1._commands.appendsiblingnode.execute = function(){
+                console.log('appendsiblingnode');
+                console.log(minder1.getSelectedNode());
+                appendsiblingnodeExec(minder1, '分支主题');
+            }
+            var appendparentnodeExec = minder1._commands.appendparentnode.execute;
+            minder1._commands.appendparentnode.execute = function(){
+                console.log('appendparentnode');
+                console.log(minder1.getSelectedNode());
+                appendparentnodeExec(minder1, '分支主题');
+            }
+		};
+	});
+
+    angular.module('kityminderDemo2', ['kityminderEditor'])
+    .controller('MainController', function($scope) {
+        // console.log('kityminderDemo2');
+        $scope.initEditor = function(editor, minder) {
+            // console.log('kityminderDemo2', editor, minder);
+            window.editor2 = editor;
+            window.minder2 = minder;
+
+            minder2.importJson(testJson);
+            minder2.on('dblclick', function() {
+                if (minder2.getSelectedNode() && minder2._status !== 'readonly') {
+                    console.log(minder2.getSelectedNode());
+                }
+            });
+            minder2.execCommand('template', 'filetree');
+            /*minder._commands.removenode.execute(minder, function(removeFun){
+                removeFun(minder);
+            })*/
+            var appendchildnodeExec = minder2._commands.appendchildnode.execute;
+            minder2._commands.appendchildnode.execute = function(){
+                console.log('appendchildnode');
+                console.log(minder2.getSelectedNode());
+                appendchildnodeExec(minder2, '分支主题');
+            }
+            var appendsiblingnodeExec = minder2._commands.appendsiblingnode.execute;
+            minder2._commands.appendsiblingnode.execute = function(){
+                console.log('appendsiblingnode');
+                console.log(minder2.getSelectedNode());
+                appendsiblingnodeExec(minder2, '分支主题');
+            }
+            var appendparentnodeExec = minder2._commands.appendparentnode.execute;
+            minder2._commands.appendparentnode.execute = function(){
+                console.log('appendparentnode');
+                console.log(minder2.getSelectedNode());
+                appendparentnodeExec(minder2, '分支主题');
+            }
+        };
+    });
+    angular.bootstrap(document.querySelector('.test1'), ['kityminderDemo1']);
+    angular.bootstrap(document.querySelector('.test2'), ['kityminderDemo2']);
+
+</script>
+
+</html>

@@ -15,7 +15,9 @@ angular.module('kityminderEditor')
             scope: {
                 minder: '='
             },
-            link: function(scope) {
+            link: function(scope, element) {
+                var minder = scope.minder;
+
                 minder.setDefaultOptions({zoom: config.get('zoom')});
 
                 scope.isNavOpen = !memory.get('navigator-hidden');
@@ -30,7 +32,7 @@ angular.module('kityminderEditor')
                 };
 
                 scope.getHeight = function(value) {
-                    var totalHeight = $('.zoom-pan').height();
+                    var totalHeight = element.find('.zoom-pan').height();
 
                     return scope.getZoomRadio(value) * totalHeight;
                 };
@@ -82,7 +84,7 @@ angular.module('kityminderEditor')
                 /**  以下部分是缩略图导航器 *
                  * */
 
-                var $previewNavigator = $('.nav-previewer');
+                var $previewNavigator = element.find('.nav-previewer');
 
                 // 画布，渲染缩略图
                 var paper = new kity.Paper($previewNavigator[0]);

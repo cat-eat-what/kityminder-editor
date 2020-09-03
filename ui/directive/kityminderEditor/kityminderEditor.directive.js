@@ -12,10 +12,15 @@ angular.module('kityminderEditor')
 				var $minderEditor = element.children('.minder-editor')[0];
 
 				function onInit(editor, minder) {
-					scope.onInit({
-						editor: editor,
-						minder: minder
-					});
+					if (attributes.onInit.indexOf('(') > 0) {
+						scope.onInit({
+							editor: editor,
+							minder: minder
+						});
+					} else {
+						var onInitFunc = scope.$parent.$eval(attributes.onInit);
+						onInitFunc(editor, minder);
+					}
 
 					minderService.executeCallback();
 				}
@@ -26,7 +31,9 @@ angular.module('kityminderEditor')
 						base: './src'
 					});
 
-					define('demo', function(require) {
+					var id = 'd' + String(new Date().getTime())
+
+					define(id, function(require) {
 						var Editor = require('editor');
 
 						var editor = window.editor = new Editor($minderEditor);
@@ -51,7 +58,7 @@ angular.module('kityminderEditor')
 						onInit(editor, minder);
 					});
 
-					seajs.use('demo');
+					seajs.use(id);
 
 				} else if (window.kityminder && window.kityminder.Editor) {
 					var editor = new kityminder.Editor($minderEditor);
